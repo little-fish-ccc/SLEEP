@@ -1,0 +1,16 @@
+{
+  "name": "沉眠符咒 · 睡眠与工作记账",
+  "short_name": "沉眠符咒",
+  "description": "睡眠银行 / 工作银行的个人记账与韧性积分管理工具（单文件应用）",
+  "lang": "zh-CN",
+  "start_url": "./?v=20260930b",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0f0d1a",
+  "theme_color": "#0f0d1a",
+  "icons": [
+    { "src": "icon-192.png?v=20260930b", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icon-512.png?v=20260930b", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
