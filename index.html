@@ -1,0 +1,3944 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<!-- 强制浏览器不要缓存本页：否则改完代码刷新后拿到的还是旧版 HTML（曾导致修复“看不到效果”） -->
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f0d1a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="沉眠符咒">
+<link rel="manifest" href="manifest.json?v=20260930b">
+<link rel="apple-touch-icon" href="icon-192.png?v=20260930b">
+<title>💤 沉眠符咒 - 金币系统+银行系统</title>
+<script src="https://cdn.jsdelivr.net/npm/@twemoji/api@latest/dist/twemoji.min.js?v=20260930b" crossorigin="anonymous"></script>
+<style>
+/* ===== CSS 变量 ===== */
+:root {
+  --bg: #0f0d1a; --bg-card: #1a1726; --bg-card-2: #221d33; --bg-input: #0a0813;
+  --border: #3a3358; --border-light: #4a4373; --text: #e8e4f5;
+  --text-dim: #9990b8; --text-muted: #6b6488; --accent: #9d7bff;
+  --accent-2: #c4a7ff; --accent-dim: #6b4f9e; --gold: #ffd700;
+  --gold-dim: #b8960a; --green: #6ee7a0; --red: #ff6b8a;
+  --orange: #ffa970; --blue: #7cc4ff; --cyan: #6ee0e0;
+}
+
+/* 限制 Twemoji 图片大小 */
+img.emoji {
+  width: 1.1em;
+  height: 1.1em;
+  vertical-align: -0.1em;
+  display: inline-block;
+}
+.module-header img.emoji,
+.sub-header img.emoji,
+.header h1 img.emoji {
+  width: 1.2em;
+  height: 1.2em;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  background: var(--bg); color: var(--text); line-height: 1.6;
+  min-height: 100vh; padding: 16px;
+}
+
+/* ===== 布局 ===== */
+.container { max-width: 900px; margin: 0 auto; }
+
+/* ===== 头部 ===== */
+.header { text-align: center; padding: 24px 16px 20px; }
+.header h1 {
+  font-size: 1.6rem; font-weight: 700; color: var(--accent-2);
+  letter-spacing: 0.04em;
+}
+.header .subtitle {
+  font-size: 0.8rem; color: var(--text-muted); margin-top: 6px;
+}
+
+/* ===== 日期导航 ===== */
+.date-nav { margin-bottom: 16px; }
+.date-nav input[type="date"] {
+  width: 100%; padding: 10px 14px; border: 1px solid var(--border);
+  border-radius: 10px; background: var(--bg-input); color: var(--text);
+  font-size: 0.95rem; outline: none; margin-bottom: 8px;
+  transition: border-color 0.2s;
+}
+.date-nav input[type="date"]:focus { border-color: var(--accent); }
+.date-nav .date-btns { display: flex; gap: 6px; }
+.date-nav .date-btns button {
+  flex: 1; padding: 8px 0; border: 1px solid var(--border); border-radius: 8px;
+  background: var(--bg-card); color: var(--text-dim); font-size: 0.85rem;
+  cursor: pointer; transition: all 0.2s;
+}
+.date-nav .date-btns button:hover { background: var(--bg-card-2); color: var(--text); }
+.date-nav .date-btns button.today-btn { color: var(--accent-2); font-weight: 600; }
+
+/* ===== 统计栏 ===== */
+.stats-bar { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 16px; }
+.stat-card {
+  background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px;
+  padding: 14px 12px; text-align: center; cursor: default; transition: border-color 0.2s;
+}
+.stat-card.clickable { cursor: pointer; }
+.stat-card.clickable:hover { border-color: var(--accent); }
+.stat-card .stat-label { font-size: 0.7rem; color: var(--text-muted); margin-bottom: 4px; }
+.stat-card .stat-value { font-size: 1.25rem; font-weight: 700; color: var(--accent-2); }
+.stat-card .stat-value.gold { color: var(--gold); }
+
+/* ===== 模块卡片 ===== */
+.module-card {
+  background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px;
+  margin-bottom: 14px; overflow: hidden;
+}
+.module-header {
+  display: flex; align-items: center; gap: 10px; padding: 14px 18px;
+  cursor: pointer; user-select: none; transition: background 0.2s;
+}
+.module-header:hover { background: var(--bg-card-2); }
+.module-header .toggle-icon {
+  font-size: 0.75rem; color: var(--text-muted); transition: transform 0.3s;
+  min-width: 14px; text-align: center;
+}
+.module-header .toggle-icon.open { transform: rotate(90deg); }
+.module-header .module-title { font-weight: 600; color: var(--text); font-size: 0.95rem; }
+.module-body { padding: 0 18px 16px; display: none; }
+.module-body.open { display: block; }
+
+/* 子模块 */
+.sub-module {
+  background: var(--bg-card-2); border: 1px solid var(--border); border-radius: 12px;
+  margin-bottom: 12px; overflow: hidden;
+}
+.sub-module:last-child { margin-bottom: 0; }
+.sub-header {
+  display: flex; align-items: center; gap: 8px; padding: 12px 16px;
+  cursor: pointer; user-select: none; transition: background 0.2s;
+  font-weight: 600; font-size: 0.88rem; color: var(--text-dim);
+}
+.sub-header:hover { background: rgba(157, 123, 255, 0.05); }
+.sub-header .sub-toggle { font-size: 0.7rem; color: var(--text-muted); transition: transform 0.3s; }
+.sub-header .sub-toggle.open { transform: rotate(90deg); }
+.sub-body { padding: 0 16px 14px; display: none; }
+.sub-body.open { display: block; }
+
+/* 身份回顾 */
+.review-table { width: 100%; border-collapse: collapse; font-size: 0.78rem; margin-top: 4px; }
+.review-table th { padding: 5px 6px; text-align: center; color: var(--text-muted); border-bottom: 1px solid var(--border); font-weight: 600; }
+.review-table td { padding: 5px 6px; border-bottom: 1px solid rgba(58,51,88,0.3); }
+.review-table tbody tr:last-child td { border-bottom: none; }
+
+/* ===== 表单元素 ===== */
+.form-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
+.form-row label { font-size: 0.82rem; color: var(--text-dim); white-space: nowrap; }
+input[type="number"], input[type="text"], select {
+  padding: 6px 10px; border: 1px solid var(--border); border-radius: 7px;
+  background: var(--bg-input); color: var(--text); font-size: 0.85rem;
+  outline: none; transition: border-color 0.2s;
+}
+input[type="number"]:focus, input[type="text"]:focus, select:focus { border-color: var(--accent); }
+input[type="number"] { width: 70px; }
+select { min-width: 80px; }
+
+.radio-group { display: flex; gap: 12px; }
+.radio-group label { cursor: pointer; font-size: 0.82rem; color: var(--text-dim); }
+.radio-group input[type="radio"] { margin-right: 4px; accent-color: var(--accent); }
+
+/* ===== 技能表 ===== */
+.skill-table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 0.82rem; }
+.skill-table th {
+  padding: 8px 6px; text-align: left; color: var(--text-muted); font-weight: 500;
+  border-bottom: 1px solid var(--border); font-size: 0.75rem;
+}
+.skill-table td { padding: 8px 6px; border-bottom: 1px solid rgba(58,51,88,0.5); }
+.skill-table td input[type="number"] { width: 58px; padding: 4px 6px; font-size: 0.8rem; }
+
+/* 技能额外行 */
+.skill-extra-row td {
+  font-size: 0.8rem; color: var(--text-dim); padding: 8px 12px;
+  border-bottom: 1px solid rgba(58,51,88,0.3);
+  background: rgba(98, 90, 170, 0.12);
+  display: flex; align-items: center; justify-content: center; gap: 12px;
+  line-height: 1.6;
+}
+.skill-extra-row td::before {
+  content: "补充说明";
+  font-size: 0.85rem; color: var(--accent); font-weight: 600;
+  white-space: nowrap; flex-shrink: 0;
+}
+.skill-extra-row input { width: 50px; padding: 3px 5px; font-size: 0.75rem; }
+
+/* 判定结果颜色 */
+.result-badge {
+  display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 0.75rem;
+  font-weight: 600; min-width: 48px; text-align: center;
+}
+.result-crit { background: rgba(255,215,0,0.15); color: var(--gold); border: 1px solid var(--gold-dim); }
+.result-extreme { background: rgba(110,231,160,0.1); color: var(--green); border: 1px solid rgba(110,231,160,0.3); }
+.result-hard { background: rgba(110,224,224,0.1); color: var(--cyan); border: 1px solid rgba(110,224,224,0.3); }
+.result-normal { background: rgba(124,196,255,0.1); color: var(--blue); border: 1px solid rgba(124,196,255,0.3); }
+.result-fail { background: rgba(255,107,138,0.1); color: var(--red); border: 1px solid rgba(255,107,138,0.3); }
+.result-fumble { background: rgba(200,50,50,0.15); color: #ff4444; border: 1px solid rgba(200,50,50,0.4); }
+.result-pending { color: var(--text-muted); border: 1px dashed var(--border-light); }
+
+.info-btn {
+  background: none; border: 1px solid var(--border); border-radius: 5px;
+  color: var(--text-muted); cursor: pointer; padding: 2px 8px; font-size: 0.75rem;
+  transition: all 0.2s;
+}
+.info-btn:hover { border-color: var(--accent); color: var(--accent-2); }
+
+/* ===== 琐事标签 ===== */
+.chore-row { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; flex-wrap: wrap; }
+.chore-row .day-label { font-weight: 600; color: var(--text-dim); min-width: 44px; font-size: 0.82rem; }
+.chore-tag {
+  padding: 3px 12px; border-radius: 14px; font-size: 0.78rem; cursor: pointer;
+  border: 1px solid var(--border); background: var(--bg-input); color: var(--text-dim);
+  transition: all 0.2s; user-select: none;
+}
+.chore-tag.selected {
+  background: rgba(157,123,255,0.15); border-color: var(--accent); color: var(--accent-2);
+}
+.chore-row .day-status {
+  font-size: 0.82rem; margin-left: 4px;
+}
+.chore-row .day-done { color: var(--green); }
+.day-done-icon { font-size: 0.9rem; min-width: 20px; }
+
+/* 周四说明 */
+.thu-note {
+  font-size: 0.7rem; color: var(--text-muted); line-height: 1.6; margin-top: 2px;
+  text-align: left;
+}
+.thu-row { align-items: flex-start !important; }
+.thu-tag {
+  font-size: 0.68rem !important; color: var(--text-muted) !important;
+  opacity: 0.8; padding: 6px 10px !important; white-space: normal !important;
+  max-width: 260px;
+}
+.thu-tag.selected {
+  background: rgba(157,123,255,0.15) !important;
+  border-color: var(--accent) !important;
+  color: var(--accent-2) !important;
+  opacity: 1 !important;
+}
+
+/* ===== 睡眠银行 ===== */
+.sleep-stats { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
+.sleep-stats-row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.sleep-stat-card {
+  background: var(--bg-card-2); border: 1px solid var(--border); border-radius: 10px;
+  padding: 12px; text-align: center;
+}
+.sleep-stat-card .slabel { font-size: 0.72rem; color: var(--text-muted); margin-bottom: 4px; }
+.sleep-stat-card .svalue { font-size: 1.1rem; font-weight: 700; color: var(--accent-2); }
+.sleep-stat-card.clickable { cursor: pointer; }
+.sleep-stat-card.clickable:hover { border-color: var(--accent); }
+
+.time-selectors { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 10px; }
+.time-selector-group { display: flex; align-items: center; gap: 6px; }
+.time-selector-group label { font-size: 0.8rem; color: var(--text-dim); white-space: nowrap; }
+.time-selector-group select, .time-selector-group input[type="time"] {
+  padding: 6px 8px; border: 1px solid var(--border); border-radius: 7px;
+  background: var(--bg-input); color: var(--text); font-size: 0.85rem; outline: none;
+}
+.time-selector-group select { min-width: 55px; width: auto; }
+.time-unit { font-size: 0.75rem; color: var(--text-dim); margin: 0 1px; }
+
+/* 打卡 checkbox */
+.check-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.check-row input[type="checkbox"] { accent-color: var(--accent); width: 16px; height: 16px; }
+.check-row label { font-size: 0.82rem; color: var(--text-dim); cursor: pointer; }
+
+/* 韧性积分区域 */
+.tenacity-section {
+  margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border);
+}
+.tenacity-header {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 10px;
+}
+.tenacity-header .t-stat { text-align: center; min-width: 0; }
+.tenacity-header .t-stat .t-label { font-size: 0.7rem; color: var(--text-muted); }
+.tenacity-header .t-stat .t-value { font-size: 1.05rem; font-weight: 700; color: var(--orange); min-width: 0; }
+.tenacity-header .t-stat input#loanInterest:focus { outline: none; border-color: var(--accent); }
+
+.tenacity-checks { margin-bottom: 10px; }
+.tenacity-check-row {
+  display: flex; align-items: center; gap: 8px; margin-bottom: 6px;
+  font-size: 0.75rem; color: var(--text-dim);
+}
+.tenacity-check-row .check-icon { font-size: 1rem; min-width: 18px; text-align: center; }
+
+/* ===== 时光穿越技能框 ===== */
+.skill-box {
+  margin-top: 12px; border: 1px solid var(--border); border-radius: 10px;
+  background: var(--bg-card); overflow: hidden;
+}
+.skill-box-header {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 14px; cursor: pointer; user-select: none;
+  background: rgba(98,90,170,0.10);
+  font-size: 0.82rem; font-weight: 400; color: var(--text-muted);
+}
+.skill-box-header:hover { background: rgba(98,90,170,0.18); }
+.skill-box-header .skill-box-name {
+  font-size: 0.82rem; font-weight: 400; color: var(--text-muted);
+}
+.skill-box-cooldown {
+  font-size: 0.7rem; color: var(--text-muted); margin-left: auto;
+}
+.skill-box-body { padding: 12px 14px; }
+.skill-box-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 8px 0; border-bottom: 1px solid rgba(58,51,88,0.45);
+  font-size: 0.78rem; color: var(--text-dim);
+}
+.skill-box-row:last-child { border-bottom: none; }
+.skill-box-row .row-label {
+  color: var(--text-muted); font-size: 0.78rem;
+}
+.skill-box-row .row-val {
+  color: var(--text); font-size: 0.86rem; font-weight: 600;
+}
+.skill-box-row .num-val {
+  display: inline-block; min-width: 28px; text-align: center;
+  color: var(--orange); font-weight: 700; font-size: 1rem;
+}
+.skill-box-row input[type="number"] {
+  width: 80px; padding: 5px 8px; font-size: 0.85rem;
+  background: var(--bg-input); color: var(--text);
+  border: 1px solid var(--border); border-radius: 6px;
+}
+.skill-box-row input[disabled] {
+  color: var(--text-muted); background: var(--bg-input); opacity: 0.7;
+}
+.skill-box-extra {
+  margin-top: 10px; padding-top: 10px;
+  border-top: 1px dashed rgba(58,51,88,0.4);
+  display: flex; flex-direction: column; gap: 8px;
+  font-size: 0.8rem; color: var(--text-dim);
+}
+.skill-box-extra .voucher-date { color: var(--accent-2); }
+.skill-box-extra .btf-line {
+  display: flex; justify-content: space-between; align-items: center;
+}
+.skill-box-extra .btf-line input[type="number"] {
+  width: 80px; padding: 5px 8px; font-size: 0.85rem;
+  background: var(--bg-input); color: var(--text);
+  border: 1px solid var(--border); border-radius: 6px;
+}
+.skill-box-extra .btf-line input[disabled] { color: var(--text-muted); opacity: 0.7; }
+.streak-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 28px; height: 28px; border: 1px solid var(--border); border-radius: 6px;
+  font-size: 0.85rem; font-weight: 700; color: var(--orange); background: var(--bg-input);
+}
+.streak-badge.streak-done { border-color: var(--green); color: var(--green); background: rgba(110,231,160,0.08); }
+
+/* 周结算 */
+.weekly-section {
+  background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px;
+  padding: 14px; margin-top: 10px;
+}
+.weekly-section .ws-title { font-weight: 600; color: var(--orange); margin-bottom: 10px; font-size: 0.9rem; }
+.weekly-table { width: 100%; border-collapse: collapse; font-size: 0.78rem; margin-top: 8px; }
+.weekly-table th { padding: 6px; text-align: center; color: var(--text-muted); border-bottom: 1px solid var(--border); }
+.weekly-table td { padding: 6px; text-align: center; border-bottom: 1px solid rgba(58,51,88,0.4); }
+
+/* 工作时间银行 */
+.work-stats { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
+.work-tenacity-header {
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 10px;
+}
+.work-tenacity-header .t-stat {
+  display: flex; flex-direction: column; align-items: center; min-width: 0;
+}
+.work-tenacity-header .t-stat .t-label {
+  font-size: 0.75rem; color: var(--text-muted); text-align: center;
+}
+.work-tenacity-header .t-stat .t-value {
+  font-size: 0.9rem; font-weight: 600; color: var(--orange);
+  display: flex; align-items: center; justify-content: center; min-height: 28px;
+}
+.quality-tag {
+  padding: 4px 14px; border-radius: 14px; font-size: 0.8rem; cursor: pointer;
+  border: 1px solid var(--border); background: var(--bg-input); color: var(--text-dim);
+  transition: all 0.2s; user-select: none;
+}
+.quality-tag.selected {
+  background: rgba(157,123,255,0.15); border-color: var(--accent); color: var(--accent-2);
+}
+.overtime-rules {
+  background: var(--bg-input); border: 1px solid var(--border);
+  border-radius: 8px; padding: 12px; margin: 8px 0;
+  font-size: 0.78rem; color: var(--text-dim); line-height: 1.7;
+  display: none; white-space: pre-wrap;
+}
+.overtime-rules.show { display: block; }
+
+/* ===== 弹窗 ===== */
+.popup-overlay {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0,0,0,0.5); z-index: 1000; display: none;
+  justify-content: center; align-items: flex-start; padding-top: 80px;
+}
+.popup-overlay.show { display: flex; }
+.popup-content {
+  background: var(--bg-card-2); border: 1px solid var(--border-light); border-radius: 14px;
+  padding: 20px; max-width: 420px; width: 90%; max-height: 70vh; overflow-y: auto;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+}
+.popup-content h3 { font-size: 0.95rem; margin-bottom: 12px; color: var(--accent-2); }
+.popup-content .popup-row {
+  display: flex; justify-content: space-between; padding: 6px 0;
+  border-bottom: 1px solid rgba(58,51,88,0.4); font-size: 0.82rem;
+}
+.popup-content .popup-close {
+  display: block; margin: 14px auto 0; padding: 6px 24px;
+  border: 1px solid var(--border); border-radius: 8px; background: var(--bg-card);
+  color: var(--text-dim); cursor: pointer; font-size: 0.85rem;
+}
+
+/* 技能说明弹窗 */
+.skill-info-popup .popup-content { max-width: 360px; }
+
+/* ===== Toast ===== */
+.toast {
+  position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+  background: var(--accent-dim); color: var(--text); padding: 10px 24px;
+  border-radius: 20px; font-size: 0.85rem; z-index: 2000; opacity: 0;
+  transition: opacity 0.3s; pointer-events: none;
+}
+.toast.show { opacity: 1; }
+
+/* ===== 响应式 ===== */
+@media (max-width: 640px) {
+  .stats-bar { grid-template-columns: repeat(2, 1fr); }
+  .sleep-stats { grid-template-columns: repeat(2, 1fr); }
+  /* 技能表转卡片式 */
+  .skill-table, .skill-table tbody, .skill-table tr, .skill-table td, .skill-table th { display: block; }
+  .skill-table thead { display: none; }
+  .skill-table tr {
+    background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px;
+    padding: 12px; margin-bottom: 8px;
+  }
+  .skill-table td {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 4px 0; border: none; gap: 8px;
+  }
+  .skill-table td::before {
+    content: attr(data-label); font-size: 0.72rem; color: var(--text-muted);
+    min-width: 60px;
+  }
+  .time-selectors { flex-direction: column; }
+}
+
+/* ===== 兑换树 ===== */
+.ex-item { background: rgba(98,90,170,0.08); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; margin-bottom: 8px; }
+.ex-item-head { display: flex; flex-direction: column; gap: 2px; margin-bottom: 6px; }
+.ex-name { font-size: 0.86rem; font-weight: 600; color: var(--text); }
+.ex-desc { font-size: 0.74rem; color: var(--text-muted); }
+.ex-item-actions { display: flex; align-items: center; gap: 4px; flex-wrap: nowrap; overflow: hidden; }
+.ex-item-actions .ex-btn { padding: 3px 8px; font-size: 0.76rem; white-space: nowrap; }
+.ex-btn { background: var(--accent); color: #fff; border: none; border-radius: 6px; padding: 4px 10px; font-size: 0.78rem; cursor: pointer; }
+.ex-btn:hover { filter: brightness(1.1); }
+.ex-btn.ghost { background: transparent; color: var(--text-dim); border: 1px solid var(--border); }
+.ex-btn.add { background: var(--green); margin-top: 4px; }
+.ex-record { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; padding: 3px 0; border-bottom: 1px dashed var(--border); }
+.ex-record > span:first-child { flex: 1; }
+.ex-editor { background: rgba(0,0,0,0.18); border: 1px solid var(--border); border-radius: 8px; padding: 10px; margin-bottom: 8px; }
+.ex-tiers { margin-top: 6px; }
+.ex-tier-row { display: flex; align-items: center; gap: 4px; font-size: 0.76rem; margin-bottom: 4px; flex-wrap: wrap; }
+</style>
+</head>
+<body>
+<div class="container">
+  <!-- ===== 头部 ===== -->
+  <div class="header">
+    <h1>💤 沉眠符咒</h1>
+    <div class="subtitle">金币系统+银行系统 · 守夜人的梦境契约 · v2.1</div>
+  </div>
+
+  <!-- ===== 日期导航 ===== -->
+  <div class="date-nav">
+    <input type="date" id="datePicker">
+    <div class="date-btns">
+      <button onclick="shiftDate(-1)">‹ 前一天</button>
+      <button class="today-btn" onclick="goToday()">今天</button>
+      <button onclick="shiftDate(1)">后一天 ›</button>
+    </div>
+  </div>
+
+  <!-- ===== 统计栏 ===== -->
+  <div class="stats-bar" id="statsBar"></div>
+
+  <!-- ===== 模块1: 金币系统 ===== -->
+  <div class="module-card" id="moduleCoin">
+    <div class="module-header" onclick="toggleModule('coinBody')">
+      <span class="toggle-icon" id="coinToggle">▶</span>
+      <span class="module-title">🪙 金币系统</span>
+    </div>
+    <div class="module-body" id="coinBody">
+      <!-- 1.1 沉眠符咒 -->
+      <div class="sub-module">
+        <div class="sub-header" onclick="toggleSub('sleepRuneBody')">
+          <span class="sub-toggle" id="sleepRuneToggle">▶</span>💤 沉眠符咒
+        </div>
+        <div class="sub-body" id="sleepRuneBody">
+          <div class="form-row">
+            <label>身份 (1-10):</label>
+            <input type="number" id="sleepIdentity" min="1" max="10" placeholder="1-10" onchange="onSleepIdentityChange()">
+            <span id="sleepIdentityName" style="color:var(--accent-2);font-size:0.85rem;"></span>
+          </div>
+          <table class="skill-table">
+            <thead><tr><th>技能名称</th><th>技能数值</th><th>投掷值</th><th>判定结果</th><th>说明</th></tr></thead>
+            <tbody id="sleepSkillTable"></tbody>
+          </table>
+          <div class="form-row">
+            <label>是否成功执行:</label>
+            <div class="radio-group" id="sleepSuccessGroup">
+              <label><input type="radio" name="sleepSuccess" value="yes" onchange="onSleepSuccessChange()"> 是</label>
+              <label><input type="radio" name="sleepSuccess" value="no" onchange="onSleepSuccessChange()"> 否</label>
+            </div>
+          </div>
+          <div class="form-row" id="sleepCoinDisplay" style="color:var(--gold);font-weight:600;"></div>
+          <!-- 身份回顾 -->
+          <div class="sub-header" onclick="toggleSub('sleepReviewBody')">
+            <span class="sub-toggle" id="sleepReviewToggle">▶</span>📜 身份回顾
+          </div>
+          <div class="sub-body" id="sleepReviewBody"></div>
+        </div>
+      </div>
+
+      <!-- 1.2 琐事固定术 -->
+      <div class="sub-module">
+        <div class="sub-header" onclick="toggleSub('choresBody')">
+          <span class="sub-toggle" id="choresToggle">▶</span>🧾 琐事固定术
+        </div>
+        <div class="sub-body" id="choresBody">
+          <div id="choresContainer"></div>
+          <div class="form-row" style="margin-top:8px;color:var(--gold);font-weight:600;" id="choreCoinDisplay"></div>
+        </div>
+      </div>
+
+      <!-- 1.3 前置身份 -->
+      <div class="sub-module">
+        <div class="sub-header" onclick="toggleSub('preIdBody')">
+          <span class="sub-toggle" id="preIdToggle">▶</span>⏳ 前置身份
+        </div>
+        <div class="sub-body" id="preIdBody">
+          <div class="form-row">
+            <label>选择任务 (1-10):</label>
+            <input type="number" id="preIdIdentity" min="1" max="10" placeholder="1-10" onchange="onPreIdIdentityChange()">
+            <span id="preIdTaskName" style="color:var(--accent-2);font-size:0.85rem;"></span>
+          </div>
+          <div class="form-row" id="preIdCustomRow" style="display:none;">
+            <label>限定任务内容:</label>
+            <input type="text" id="preIdCustomInput" placeholder="输入限定任务内容" onchange="onPreIdCustomChange()">
+          </div>
+          <table class="skill-table">
+            <thead><tr><th>技能名称</th><th>技能数值</th><th>投掷值</th><th>判定结果</th><th>说明</th></tr></thead>
+            <tbody id="preIdSkillTable"></tbody>
+          </table>
+          <div class="form-row">
+            <label>是否成功执行:</label>
+            <div class="radio-group" id="preIdSuccessGroup">
+              <label><input type="radio" name="preIdSuccess" value="yes" onchange="onPreIdSuccessChange()"> 是</label>
+              <label><input type="radio" name="preIdSuccess" value="no" onchange="onPreIdSuccessChange()"> 否</label>
+            </div>
+          </div>
+          <div class="form-row" id="preIdCoinDisplay" style="color:var(--gold);font-weight:600;"></div>
+          <!-- 身份回顾 -->
+          <div class="sub-header" onclick="toggleSub('preIdReviewBody')">
+            <span class="sub-toggle" id="preIdReviewToggle">▶</span>📜 身份回顾
+          </div>
+          <div class="sub-body" id="preIdReviewBody"></div>
+        </div>
+      </div>
+
+      <!-- 1.4 兑换树 -->
+      <div class="sub-module">
+        <div class="sub-header" onclick="toggleSub('exchangeTreeBody')">
+          <span class="sub-toggle" id="exchangeTreeToggle">▶</span>🌳 兑换树
+        </div>
+        <div class="sub-body" id="exchangeTreeBody"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 模块2: 银行系统 ===== -->
+  <div class="module-card" id="moduleBank">
+    <div class="module-header" onclick="toggleModule('bankBody')">
+      <span class="toggle-icon" id="bankToggle">▶</span>
+      <span class="module-title">🏦 银行系统</span>
+    </div>
+    <div class="module-body" id="bankBody">
+      <!-- 2.1 睡眠银行 -->
+      <div class="sub-module">
+        <div class="sub-header" onclick="toggleSub('sleepBankBody')">
+          <span class="sub-toggle" id="sleepBankToggle">▶</span>💤 睡眠银行
+        </div>
+        <div class="sub-body" id="sleepBankBody">
+          <!-- 顶部统计 -->
+          <div class="sleep-stats" id="sleepBankStats"></div>
+
+          <!-- 昨夜睡眠时间 -->
+          <div style="margin-bottom:10px;font-weight:600;color:var(--text-dim);font-size:0.85rem;">昨夜睡眠时间</div>
+          <div class="time-selectors" id="sleepTimeInputs"></div>
+
+          <!-- 打卡加分 -->
+          <div class="check-row">
+            <input type="checkbox" id="sleepLightOff" onchange="onSleepCheckChange()">
+            <label for="sleepLightOff">昨晚21:30前关主灯 (+10)</label>
+          </div>
+          <div class="check-row">
+            <input type="checkbox" id="sleepCatGroom" onchange="onSleepCheckChange()">
+            <label for="sleepCatGroom">昨晚21:30前梳毛刷牙 (+15)</label>
+          </div>
+
+          <!-- 韧性积分 -->
+          <div class="tenacity-section" id="tenacitySection"></div>
+        </div>
+      </div>
+
+      <!-- 2.2 工作时间银行 -->
+      <div class="sub-module">
+        <div class="sub-header" onclick="toggleSub('workTimeBody')">
+          <span class="sub-toggle" id="workTimeToggle">▶</span>👔 工作时间银行
+        </div>
+        <div class="sub-body" id="workTimeBody">
+          <div class="work-stats" id="workBankStats"></div>
+          <div id="workTimeInputs"></div>
+          <div class="tenacity-section" id="workTenacitySection"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 弹窗 ===== -->
+<div class="popup-overlay" id="popupOverlay" onclick="closePopup(event)">
+  <div class="popup-content" id="popupContent" onclick="event.stopPropagation()"></div>
+</div>
+
+<!-- ===== Toast ===== -->
+<div class="toast" id="toast"></div>
+
+<!-- 数据台账入口：刻意做得极暗极小，放在页面最底部角落，平时几乎注意不到 -->
+<div style="text-align:right;padding:2px 14px 10px;user-select:none;">
+  <span onclick="showVoucherLedger()" title="数据台账 / 诊断"
+        style="font-size:0.58rem;color:var(--text-muted);opacity:0.35;cursor:pointer;letter-spacing:0.5px;">数据台账</span>
+</div>
+
+<script>
+// ===== 工具函数 =====
+function $(id) { return document.getElementById(id); }
+function qs(sel, parent) { return (parent || document).querySelector(sel); }
+function qsa(sel, parent) { return (parent || document).querySelectorAll(sel); }
+function escapeHtml(str) {
+  return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+}
+
+function fmtDate(d) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
+function parseDate(str) {
+  const [y, m, d] = str.split('-').map(Number);
+  return new Date(y, m - 1, d);
+}
+
+function todayStr() { return fmtDate(new Date()); }
+
+function getMonday(d) {
+  const date = new Date(d);
+  const day = date.getDay();
+  const diff = day === 0 ? -6 : 1 - day;
+  date.setDate(date.getDate() + diff);
+  return fmtDate(date);
+}
+
+function getDayOfWeek(d) {
+  const date = new Date(d);
+  return date.getDay(); // 0=周日, 1=周一, ... 6=周六
+}
+
+function getDayLabel(d) {
+  const labels = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+  return labels[getDayOfWeek(d)];
+}
+
+// 判断日期类型: 'workday'(工作日) 或 'holiday'(周末/节假日)
+function getDayType(dateStr) {
+  const Y = Number(dateStr.split('-')[0]);
+  // 按年份选用对应法定节假日表（你的数据在 2026 年，必须用 2026 表；
+  // 旧代码写死 HOLIDAYS_2025，对 2026 日期字符串匹配不上，导致 2026 节假日漏判）
+  let hol = [], ovr = [];
+  if (Y === 2025) { hol = HOLIDAYS_2025; ovr = WORKDAY_OVERRIDE_2025; }
+  else if (Y === 2026) { hol = HOLIDAYS_2026; ovr = WORKDAY_OVERRIDE_2026; }
+  if (hol.includes(dateStr)) return 'holiday';
+  if (ovr.includes(dateStr)) return 'workday';
+  const dow = getDayOfWeek(parseDate(dateStr));
+  return (dow === 0 || dow === 6) ? 'holiday' : 'workday';
+}
+
+// ===== 常量 =====
+const STORAGE_KEY = 'sleepRuneData_v3';
+const INITIAL_COIN_PILE = 54;
+const INITIAL_SLEEP_BANK = -13533;
+const INITIAL_TENACITY = 4;
+// 月度初值: 7月=-1519
+const MONTH_INITIALS = { 7: -1519 };
+
+// 兑换树默认物品（kind: flat 固定分 / per100 每100元消耗 / tiered 按金额分档）
+const DEFAULT_EXCHANGE_ITEMS = [
+  { id: 'ex1', name: '炸排骨/炸鸡柳/狼牙土豆', kind: 'flat', cost: 5, per: 0, tiers: [] },
+  { id: 'ex2', name: '买个盲盒', kind: 'tiered', cost: 0, per: 0, tiers: [ { upTo: 100, cost: 20 }, { upTo: Infinity, cost: 30 } ] },
+  { id: 'ex4', name: '买点谷子', kind: 'per100', cost: 0, per: 10, tiers: [] },
+  { id: 'ex5', name: '买骰子', kind: 'tiered', cost: 0, per: 0, tiers: [ { upTo: 200, cost: 20 }, { upTo: Infinity, cost: 40 } ] },
+  { id: 'ex6', name: '买手串或绿松石或水晶', kind: 'tiered', cost: 0, per: 0, tiers: [ { upTo: 100, cost: 10 }, { upTo: 300, cost: 20 }, { upTo: 500, cost: 30 }, { upTo: 800, cost: 40 }, { upTo: 1000, cost: 50 }, { upTo: Infinity, cost: 50 } ] }
+];
+
+// 计算某物品在给定金额下的消耗金币数
+function computeExchangeCost(item, amount) {
+  if (item.kind === 'flat') return Number(item.cost) || 0;
+  if (item.kind === 'per100') return Math.ceil((Number(amount) || 0) / 100) * (Number(item.per) || 0);
+  if (item.kind === 'tiered') {
+    const amt = Number(amount) || 0;
+    const ts = item.tiers || [];
+    for (const t of ts) {
+      if (amt <= t.upTo) return Number(t.cost) || 0;
+    }
+    return ts.length ? (Number(ts[ts.length - 1].cost) || 0) : 0;
+  }
+  return 0;
+}
+
+// 物品计价说明文字
+function describeItem(item) {
+  if (item.kind === 'flat') return `${item.cost}分`;
+  if (item.kind === 'per100') return `每100元消耗${item.per}分`;
+  if (item.kind === 'tiered') {
+    return (item.tiers || []).map((t, i, arr) => {
+      const isLast = i === arr.length - 1;
+      const isAbove = (t.upTo === Infinity || t.upTo === null || t.upTo >= 1e9);
+      const up = isAbove ? '以上' : `${t.upTo}元`;
+      const prefix = (!isAbove && i === 0) ? '≤' : '';
+      return `${prefix}${up}${t.cost}分`;
+    }).join('，');
+  }
+  return '';
+}
+
+// 工作时间银行
+const INITIAL_WORK_BANK = 3875;
+const INITIAL_WORK_TENACITY = 42;
+// 你在这个 app 里开始统计工作日的起点：2026-07-28（此前数据在别的平台，已折算进 INITIAL_WORK_BANK）
+const WORK_BANK_INIT_DATE = '2026-07-28';
+
+// 你在这个 app 里开始统计睡眠银行的起点：2026-07-28（此前数据在别的平台，已折算进 INITIAL_SLEEP_BANK）。
+// 该日之前的整月一律视为“还没开始统计”，月积分显示为“-”，而非 0——
+// 否则翻看/导航到这些月份会自动建出带默认字段的“幽灵真实天”（全默认、睡眠分0），
+// 被当成有记录而误显 +0（正是 巳月显示 0 的根因）。
+const SLEEP_BANK_INIT_DATE = '2026-07-28';
+function isMonthBeforeStart(y, m) {
+  const [sy, sm] = SLEEP_BANK_INIT_DATE.split('-').map(Number);
+  return y < sy || (y === sy && m < sm);
+}
+
+// 2025年法定节假日（按周末规则计算）
+const HOLIDAYS_2025 = [
+  '2025-01-01',
+  '2025-01-28','2025-01-29','2025-01-30','2025-01-31',
+  '2025-02-01','2025-02-02','2025-02-03','2025-02-04',
+  '2025-04-04','2025-04-05','2025-04-06',
+  '2025-05-01','2025-05-02','2025-05-03','2025-05-04','2025-05-05',
+  '2025-05-31','2025-06-01','2025-06-02',
+  '2025-10-01','2025-10-02','2025-10-03','2025-10-04',
+  '2025-10-05','2025-10-06','2025-10-07','2025-10-08',
+];
+// 2025年串休工作日（周末但按工作日计算）
+const WORKDAY_OVERRIDE_2025 = [
+  '2025-01-26','2025-02-08','2025-04-27','2025-09-28','2025-10-11',
+];
+
+// 2026年法定节假日（来源：国务院办公厅《关于2026年部分节假日安排的通知》）
+const HOLIDAYS_2026 = [
+  '2026-09-25', '2026-09-26', '2026-09-27',                                   // 中秋节：9/25(周五)-9/27(周日)，3天不调休
+  '2026-10-01', '2026-10-02', '2026-10-03', '2026-10-04', '2026-10-05',     // 国庆节：10/1(周四)-10/7(周三)，7天
+  '2026-10-06', '2026-10-07',
+];
+// 2026年串休工作日（周末但按工作日计算）
+const WORKDAY_OVERRIDE_2026 = [
+  '2026-09-20', '2026-10-10',                                                 // 国庆补班：9/20(周日)、10/10(周六)
+];
+
+// 身份映射
+const IDENTITY_NAMES = {1:'守夜人',2:'炼金术士',3:'观众',4:'阅读者',5:'学徒',6:'驯兽师',7:'鉴定师',8:'记录官',9:'作家',10:'不眠者'};
+
+// 前置身份任务
+const PRE_ID_TASKS = {1:'打扫卫生',2:'收纳整理',3:'断舍离',4:'修bug',5:'打电话',6:'研猫',7:'整理相册',8:'给家里买东西',9:'应急预案',10:'限定任务'};
+
+// 沉眠符咒技能
+const SLEEP_SKILLS = [
+  { name: '欺瞒', threshold: 45 },
+  { name: '延时响应', threshold: 75 },
+  { name: '句号', threshold: 70 },
+  { name: '芭丝特的祝福', threshold: 65 },
+  { name: '时-光-倒-流', threshold: 65 },
+  { name: '握烬成光', threshold: 40 }
+];
+
+// 前置身份技能
+  const PRE_ID_SKILLS = [
+    { name: '时-光-倒-流v2', threshold: 65 },
+    { name: '浑水摸鱼', threshold: 75 }
+  ];
+
+// 琐事定义
+const CHORE_DEFS = {
+  1: ['运动', '洗头', '洗衣服'],       // 周一
+  2: ['扫除', '食谱', '购物单'], // 周二
+  3: ['运动', '洗头', '洗衣服'],       // 周三
+  4: [],                               // 周四（自动）
+  5: ['运动', '洗衣服', '衣装'],     // 周五
+  6: ['仔细洗头', '敷面膜'],           // 周六
+  0: ['运动']                          // 周日
+};
+
+// 技能判定
+function judgeSkill(roll, threshold) {
+  if (roll === null || roll === undefined || roll === '' || isNaN(roll)) return { result: 'pending', label: '待判定', cls: 'result-pending' };
+  const r = Number(roll);
+  if (r === 1) return { result: 'crit', label: '大成功', cls: 'result-crit' };
+  if (r === 100) return { result: 'fumble', label: '大失败', cls: 'result-fumble' };
+  if (r <= threshold / 5) return { result: 'extreme', label: '极难成功', cls: 'result-extreme' };
+  if (r <= threshold / 2) return { result: 'hard', label: '困难成功', cls: 'result-hard' };
+  if (r <= threshold) return { result: 'normal', label: '普通成功', cls: 'result-normal' };
+  return { result: 'fail', label: '失败', cls: 'result-fail' };
+}
+
+// ===== 数据管理 =====
+let store = {};
+let currentDate = todayStr();
+
+function loadStore() {
+  let _fixedTen = false; // 标记本轮是否发生过自愈写入，决定是否回写 localStorage
+  let _raw = '';
+  try {
+    _raw = localStorage.getItem(STORAGE_KEY);
+    store = _raw ? JSON.parse(_raw) : {};
+  } catch (e) { store = {}; }
+  // 迁移：持久化层若还残留派生韧性字段（_tenacityToday/_workTenacityToday），
+  // 必须强制落盘一次以剥离。否则当内存重算值与残留值“碰巧相等”时，
+  // 本轮不会触发 saveStore，自检会一直报“持久化层含派生韧性字段”。
+  if (_raw && (/"_tenacityToday"/.test(_raw) || /"_workTenacityToday"/.test(_raw))) _fixedTen = true;
+  // 自愈：韧性基数必须用你给定的初始值，绝不被任何历史残留覆盖。
+  // 之前某版 bug 曾把 _tenacityBase 写成 -sum 并持久化，导致韧性被改错成 -3 且一直残留；
+  // 这里强制重置为初始值（与每日 _tenacityToday 累加得到正确累计韧性）。
+  if (store._tenacityBase !== INITIAL_TENACITY) { store._tenacityBase = INITIAL_TENACITY; _fixedTen = true; }
+  if (store._workTenacityBase !== INITIAL_WORK_TENACITY) { store._workTenacityBase = INITIAL_WORK_TENACITY; _fixedTen = true; }
+  // 确保年结算记录存在
+  if (store._sleepYearSettlements === undefined) store._sleepYearSettlements = {};
+  if (store._workYearSettlements === undefined) store._workYearSettlements = {};
+  // 确保兑换树物品定义存在
+  if (store._exchangeItems === undefined) store._exchangeItems = JSON.parse(JSON.stringify(DEFAULT_EXCHANGE_ITEMS));
+  // 确保时光穿越技能全局记录存在
+  if (store._timeTravel === undefined) store._timeTravel = { lastUseDate: '', lastResult: '' };
+
+  // 自愈：抵押券扣分必须守恒（每次兑换有且仅有一次 -10 落地）。
+  // 先修账本，再重算每天的派生韧性，否则 _tenacityToday 会基于错误账本被重算并显错。
+  const _vHeal = healVoucherState();
+  if (_vHeal.length) { _fixedTen = true; console.info('[数据自愈·抵押券台账]', _vHeal); }
+
+  // 自愈：冷却记录指向的那天并没有真正的投掷值 → 属于误触/半途输入，解除冷却。
+  // （旧版「输入即生效」会把随手一点也当成用过技能，凭空锁住两周）
+  const _ttHeal = healTimeTravelState();
+  if (_ttHeal.length) { _fixedTen = true; console.info('[数据自愈·时光穿越]', _ttHeal); }
+
+  // 自愈：清空所有年结算记录，交给 ensureYearSettlements 用“当前正确规则 + 重置后的基数”
+  // 重新生成。否则旧版本/旧 bug 写进来的陈旧结算值（例如基数被偷时算出的 -5000）会一直
+  // 残留在 localStorage 里被直接读出，导致“打开没变化”。结算公式是确定性的，重算即正确。
+  if (Object.keys(store._sleepYearSettlements || {}).length || Object.keys(store._workYearSettlements || {}).length) _fixedTen = true;
+  store._sleepYearSettlements = {};
+  store._workYearSettlements = {};
+
+  // 先清理“幽灵空天”：getDayData 在跨年回溯探测打卡连续性时会自动建出 {} 空天，
+  // 它们没有任何字段，必须在本轮自愈“之前”就删除——否则下面的自愈会给这些空天
+  // 写入 _tenacityToday，把它们伪装成“有数据的一天”，污染年份/月度判定。
+  for (const key of Object.keys(store)) {
+    if (key.startsWith('_')) continue;
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(key)) continue;
+    const d = store[key];
+    if (d && !isRealDayData(d)) { delete store[key]; _fixedTen = true; }
+  }
+
+  // 自愈：用当前正确的规则从“原始输入”重算每一天的派生韧性（睡眠 + 工作），
+  // 清掉之前任何错误重算 / 清零残留的脏值。所有显示值都应由原始输入确定性推导，
+  // 不依赖可能被污染的存储派生值，从而保证“每一天”都与最新规则一致、不再漂移。
+  // 工作韧性涉及跨天依赖（出差打卡），按日期升序重算以保证一致。
+  const _dayKeys = Object.keys(store)
+    .filter(k => !k.startsWith('_') && /^\d{4}-\d{2}-\d{2}$/.test(k) && isRealDayData(store[k]))
+    .sort();
+  for (const key of _dayKeys) {
+    const newT = calcTenacityToday(key).total;
+    if (store[key]._tenacityToday !== newT) { store[key]._tenacityToday = newT; _fixedTen = true; }
+  }
+  for (const key of _dayKeys) {
+    const newW = calcWorkTenacityToday(key).total;
+    if (store[key]._workTenacityToday !== newW) { store[key]._workTenacityToday = newW; _fixedTen = true; }
+  }
+
+  // 自愈过程中 calcTenacityToday 会向后回溯探测，可能又建出新的 {} 空天，再清一遍。
+  for (const key of Object.keys(store)) {
+    if (key.startsWith('_')) continue;
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(key)) continue;
+    const d = store[key];
+    if (d && !isRealDayData(d)) { delete store[key]; _fixedTen = true; }
+  }
+  // 无条件保证迁移：用“净化后”的当前状态重写一次 localStorage（派生值/幽灵天会被落盘前剥离）。
+  // 不再依赖“是否检测到变化”——避免残留值碰巧相等时漏掉重写、导致自检一直报警。
+  // saveStore 内部会跳过“内容未变”的写入，因此多标签页不会互相触发死循环。
+  saveStore();
+
+  // 归一化：JSON 序列化会把 Infinity 变成 null，加载后还原为 Infinity
+  (store._exchangeItems || []).forEach(it => {
+    (it.tiers || []).forEach(t => { if (t.upTo === null || t.upTo === undefined) t.upTo = Infinity; });
+  });
+}
+
+function saveStore() {
+  // 落盘前“净化”：派生值（每日韧性 _tenacityToday/_workTenacityToday、年结算 *_YearSettlements）
+  // 只在使用时现算，绝不持久化为权威字段；幽灵天（空天 / 仅含派生字段）也不落盘。
+  // 这样 localStorage 永远是“原始输入”，任何计算错误都不会被固化进存储、污染后续读取
+  //（这正是之前“加个技能→派生值落盘→被当成真实记录→2024/2025 凭空年积分”的根因）。
+  const clean = {};
+  for (const key in store) {
+    if (key.startsWith('_')) {
+      // 年结算为纯派生值，落盘时清空（读取时按公式现算）
+      if (key === '_sleepYearSettlements' || key === '_workYearSettlements') { clean[key] = {}; continue; }
+      clean[key] = store[key];
+      continue;
+    }
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(key)) { clean[key] = store[key]; continue; }
+    const d = store[key];
+    if (!isRealDayData(d)) continue; // 幽灵天（空天/仅派生字段）不落盘
+    // 真实记录：剥掉派生韧性字段后再落盘
+    const copy = {};
+    for (const f in d) {
+      if (f === '_tenacityToday' || f === '_workTenacityToday') continue;
+      copy[f] = d[f];
+    }
+    clean[key] = copy;
+  }
+  // 内容未变则不写：避免多标签页 storage 事件互相触发写成死循环，
+  // 也避免同一份数据被反复重写。
+  const next = JSON.stringify(clean);
+  const curRaw = localStorage.getItem(STORAGE_KEY);
+  if (next !== curRaw) localStorage.setItem(STORAGE_KEY, next);
+}
+
+function getDayData(dateStr) {
+  if (!store[dateStr]) store[dateStr] = {};
+  return store[dateStr];
+}
+
+// ===== 数据自检（加载即跑，发现“不可能状态”立即报警）=====
+// 防止再次出现“加个技能就引发积分全部乱套”却没人发现的情况：
+// 任何改动评分/韧性/结算的逻辑后，selfTest 会在打开页面时立刻揪出不变量被破坏，
+// 而不是默默显示一串错数。返回问题字符串数组（空=健康）。
+function selfTest() {
+  const problems = [];
+  // 1) 韧性基数永不被任何结算/清零逻辑改写（初值即你给的初始值）
+  if (store._tenacityBase !== INITIAL_TENACITY)
+    problems.push(`睡眠韧性基数异常: ${store._tenacityBase}（应为 ${INITIAL_TENACITY}）`);
+  if (store._workTenacityBase !== INITIAL_WORK_TENACITY)
+    problems.push(`工作韧性基数异常: ${store._workTenacityBase}（应为 ${INITIAL_WORK_TENACITY}）`);
+  // 2) 内存中不得残留“仅含派生字段”的幽灵天（2024/2025 凭空年积分的根因）
+  for (const key in store) {
+    if (key.startsWith('_')) continue;
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(key)) continue;
+    const d = store[key];
+    if (d && !isRealDayData(d) && Object.keys(d).length > 0) {
+      const onlyDerived = Object.keys(d).every(k => _DERIVED_KEYS.includes(k));
+      if (onlyDerived) problems.push(`残留幽灵派生天 ${key}（仅含派生韧性字段，会污染年份/月度）`);
+    }
+  }
+  // 3) 持久化层不得含派生字段 / 幽灵天 / 无真实数据的年结算
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const persisted = JSON.parse(raw);
+      for (const key in persisted) {
+        if (key.startsWith('_')) continue;
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(key)) continue;
+        const d = persisted[key];
+        if (d && !isRealDayData(d)) problems.push(`持久化层含非真实天 ${key}（派生值/幽灵天不应落盘）`);
+      }
+      for (const S of ['_sleepYearSettlements', '_workYearSettlements']) {
+        const obj = persisted[S] || {};
+        for (const Y of Object.keys(obj)) {
+          if (!yearHasRealData(Number(Y))) problems.push(`持久化层含无真实数据的年结算 ${S}.${Y}`);
+        }
+      }
+      // 派生韧性字段不应出现在持久化层（列出具体日期，便于定位是哪个写入路径还在落盘）
+      const badKeys = [];
+      for (const key in persisted) {
+        if (key.startsWith('_')) continue;
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(key)) continue;
+        const d = persisted[key];
+        if (d && ('_tenacityToday' in d || '_workTenacityToday' in d)) badKeys.push(key);
+      }
+      if (badKeys.length) problems.push(`持久化层含派生韧性字段（应只在读取时现算）：${badKeys.join('、')}`);
+    }
+  } catch (e) { /* localStorage 不可用时不报错 */ }
+  // 4.5) 抵押券规则：勾了就扣当日 -10，不存在任何“自动取消/自动承接”痕迹
+  {
+    if (store._timeTravel && (store._timeTravel.cancelledVoucherDate !== undefined || store._timeTravel.cancelledLaunchDate !== undefined))
+      problems.push('时光穿越残留自动取消记录（旧版机制，加载时应被清除）');
+    const moved = Object.keys(store).filter(k => /^\d{4}-\d{2}-\d{2}$/.test(k) && store[k] && store[k].voucherMovedIn);
+    if (moved.length) problems.push(`残留自动承接标记 voucherMovedIn: ${moved.join('、')}（旧版机制，加载时应被清除）`);
+  }
+  // 4.6) 使用韧性积分的扣分必须落在 0（未勾）或规则允许的扣分额上
+  {
+    const amt = voucherDeductionAmount(currentDate);
+    const bad = Object.keys(store).filter(k => {
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(k)) return false;
+      const day = store[k];
+      if (!day || !day.voucherExchanged) return false;
+      const v = calcTenacityToday(k).voucher;
+      return v !== -voucherDeductionAmount(k);
+    });
+    if (bad.length) problems.push(`使用韧性积分的扣分与规则不符：${bad.join('、')}`);
+    if (currentDate >= VOUCHER_RULE_CHANGE_DATE && (amt < 7 || amt > 10))
+      problems.push(`使用韧性积分扣分超出 7~10 范围: ${amt}`);
+  }
+  // 4) 当前年积分必须是确定性公式值（进行中=基数+分数，不含韧性×24）
+  const cy = Number(currentDate.split('-')[0]);
+  const yp = calcSleepYearPoints(currentDate);
+  const expY = getYearBase(cy, true) + sumYearSleepScores(cy, currentDate);
+  if (yp !== expY) problems.push(`当前年睡眠积分与公式不符: ${yp} vs ${expY}`);
+  const wp = calcWorkYearPoints(currentDate);
+  const expW = getYearBase(cy, false) + sumYearWorkScores(cy, currentDate);
+  if (wp !== expW) problems.push(`当前年工作积分与公式不符: ${wp} vs ${expW}`);
+  return problems;
+}
+
+function showSelfTestBanner(problems) {
+  let el = document.getElementById('selfTestBanner');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'selfTestBanner';
+    el.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:9999;background:#c0392b;color:#fff;font-size:13px;line-height:1.5;padding:8px 12px;box-shadow:0 2px 8px rgba(0,0,0,.35)';
+    document.body.appendChild(el);
+  }
+  el.innerHTML = '⚠ 数据自检发现问题（请截图反馈）：'
+    + problems.map(p => '<div>• ' + p + '</div>').join('')
+    + '<div style="margin-top:4px;cursor:pointer;text-decoration:underline" onclick="this.parentNode.remove()">关闭</div>';
+}
+
+function initDayData(dateStr) {
+  const d = getDayData(dateStr);
+  if (d.sleepSkills === undefined) d.sleepSkills = {};
+  if (d.sleepSkillExtras === undefined) d.sleepSkillExtras = {};
+  if (d.sleepSkillCoin === undefined) d.sleepSkillCoin = 0;
+  if (d.sleepSuccess === undefined) d.sleepSuccess = null;
+  if (d.sleepCoin === undefined) d.sleepCoin = null;
+  if (d.chores === undefined) d.chores = {};
+  if (d.preIdSkills === undefined) d.preIdSkills = {};
+  if (d.preIdSkillExtras === undefined) d.preIdSkillExtras = {};
+  if (d.preIdSuccess === undefined) d.preIdSuccess = null;
+  if (d.preIdCoin === undefined) d.preIdCoin = null;
+  if (d.sleepPrepareTime === undefined) d.sleepPrepareTime = '';
+  if (d.sleepFallAsleepTime === undefined) d.sleepFallAsleepTime = '';
+  if (d.sleepDuration === undefined) d.sleepDuration = '';
+  if (d.sleepLightOff === undefined) d.sleepLightOff = false;
+  if (d.sleepCatGroom === undefined) d.sleepCatGroom = false;
+  if (d.voucherExchanged === undefined) d.voucherExchanged = false;
+  if (d.loanNote === undefined) d.loanNote = '';
+  // 贷款利息：是否贷款中 + 当日应扣的利息（韧性积分）
+  if (d.loanActive === undefined) d.loanActive = false;
+  if (d.loanInterest === undefined) d.loanInterest = '';
+  // 工作时间银行字段
+  if (d.workLeaveOnTime === undefined) d.workLeaveOnTime = false;
+  if (d.workFocusChecked === undefined) d.workFocusChecked = false;
+  if (d.weekendQuality === undefined) d.weekendQuality = '';
+  if (d.workOvertime === undefined) d.workOvertime = '';
+  if (d.workVoucher === undefined) d.workVoucher = false;
+  if (d._workTenacityToday === undefined) d._workTenacityToday = null;
+  // 时光穿越技能当日数据
+  if (d.timeTravel === undefined) d.timeTravel = { roll: '', result: '', butterfly: '' };
+  if (d.exchangeTree === undefined) d.exchangeTree = [];
+  saveStore();
+}
+
+// ===== 金币计算 =====
+function calcTotalCoinPile() {
+  let total = INITIAL_COIN_PILE;
+  for (const key in store) {
+    if (key.startsWith('_')) continue;
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(key)) continue;
+    // 只累计到当前查看日及之前（逐日累计余额，看哪天显示截至那天的金币堆）
+    if (key > currentDate) continue;
+    const d = store[key];
+    if (d.sleepCoin) total += d.sleepCoin;
+    if (d.sleepSkillCoin) total += d.sleepSkillCoin;
+    if (d.preIdCoin) total += d.preIdCoin;
+    if (d.choreCoin) total += d.choreCoin;
+    // 兑换树消耗：从金币堆扣除（不计入今日获得金币）
+    if (d.exchangeTree) {
+      for (const s of d.exchangeTree) total -= (s.cost || 0);
+    }
+  }
+  return total;
+}
+
+function calcTodayCoin(dateStr) {
+  const d = getDayData(dateStr);
+  let total = 0;
+  if (d.sleepCoin) total += d.sleepCoin;
+  if (d.sleepSkillCoin) total += d.sleepSkillCoin;
+  if (d.choreCoin) total += d.choreCoin;
+  if (d.preIdCoin) total += d.preIdCoin;
+  return total;
+}
+
+function calcSleepCoin(dateStr) {
+  const d = getDayData(dateStr);
+  return d.sleepCoin || 0;
+}
+
+// 金币格式化：先四舍五入到2位小数，再显示1位小数并去掉末尾的.0，避免 0.1999999999 之类的浮点误差
+function fmtCoin(n) {
+  const v = Math.round((Number(n) || 0) * 100) / 100;
+  return v.toFixed(1).replace(/\.0$/, '');
+}
+
+function calcChoreCoin(dateStr) {
+  const d = getDayData(dateStr);
+  return d.choreCoin || 0;
+}
+
+function calcPreIdCoin(dateStr) {
+  const d = getDayData(dateStr);
+  return d.preIdCoin || 0;
+}
+
+// 获取日期的前一天字符串
+function getPrevDateStr(dateStr) {
+  const d = parseDate(dateStr);
+  d.setDate(d.getDate() - 1);
+  return fmtDate(d);
+}
+
+// ===== 睡眠积分计算 =====
+// 传入的 dateStr 即该日期自身的睡眠数据，该日期的“昨日睡眠积分”基于这些数据计算
+function calcSleepScore(dateStr) {
+  const d = getDayData(dateStr);
+  if (!d.sleepDuration && d.sleepDuration !== 0) return { duration: 0, prepare: 0, bonus: 0, total: 0 };
+
+  // 如果当天兑换了抵押券，该日睡眠积分不扣不加，但数据仍纳入周统计
+  if (d.voucherExchanged) return { duration: 0, prepare: 0, bonus: 0, total: 0 };
+
+  const dur = Number(d.sleepDuration) || 0;
+  let durationScore = 0;
+  if (dur >= 420 && dur <= 450) {
+    durationScore = 0;
+  } else if (dur > 450 && dur <= 540) {
+    // 大于7.5h且小于等于9h：增加超过7.5h的分钟数积分
+    durationScore = dur - 450;
+  } else if (dur > 540) {
+    // 大于9h：按9h封顶计算（540-450=90）
+    durationScore = 540 - 450;
+  } else if (dur >= 300 && dur < 420) {
+    durationScore = -(420 - dur);
+  } else if (dur < 300) {
+    durationScore = -(120 + (300 - dur) * 2);
+  }
+
+  let prepareScore = 0;
+  const EVENING_START = 18 * 60; // 18:00 视为晚上开始
+  if (d.sleepPrepareTime) {
+    const [h, m] = d.sleepPrepareTime.split(':').map(Number);
+    let totalMin = h * 60 + m;
+    // 准备睡觉只可能发生在晚上(18:00-23:59)或凌晨(00:00-02:00跨午夜)。
+    // 凌晨时间需映射到 24:00 之后才能正确落入“00:00-02:00 扣晚睡分钟数”分支，
+    // 否则会被误判为“18:00 之前的白天时间”而加重扣分（如 1:40 误算成 -80 而非 -100）。
+    if (totalMin < EVENING_START) {
+      totalMin += 24 * 60;
+    }
+    if (totalMin >= EVENING_START && totalMin < 23 * 60) {
+      // 18:00 - 23:00 视为晚上，23:00前加分
+      const beforeMin = 23 * 60 - totalMin;
+      prepareScore = 60 + beforeMin * 2;
+    } else if (totalMin >= 23 * 60 && totalMin < 24 * 60) {
+      // 阶段一：23:00 - 00:00
+      // 23:00 整点（赶上了整段窗口）记满分 60；
+      // 23:00 之后按「距0点的分钟数」每 15 分钟一个刻度、每刻度 10 分，零头舍弃
+      if (totalMin === 23 * 60) {
+        prepareScore = 60;
+      } else {
+        const beforeMidnight = 24 * 60 - totalMin;
+        prepareScore = Math.floor(beforeMidnight / 15) * 10;
+      }
+    } else if (totalMin >= 24 * 60 && totalMin < 26 * 60) {
+      // 00:00 - 02:00，扣晚睡分钟数（与身份无关，所有身份一视同仁）
+      const afterMidnight = totalMin - 24 * 60;
+      prepareScore = -afterMidnight;
+    } else {
+      // 02:00 之后 或 18:00 之前（凌晨到傍晚，都按 2:00 之后加重扣分）
+      let after2am;
+      if (totalMin >= 26 * 60) {
+        // 02:00 之后（跨午夜）
+        after2am = totalMin - 26 * 60;
+      } else {
+        // 18:00 之前（含 02:00-18:00），按距离 02:00 的分钟数
+        after2am = totalMin - 2 * 60;
+      }
+      prepareScore = -(120 + after2am * 2);
+    }
+  }
+
+  let bonusScore = 0;
+  if (d.sleepLightOff) bonusScore += 10;
+  if (d.sleepCatGroom) bonusScore += 15;
+
+  return {
+    duration: durationScore,
+    prepare: prepareScore,
+    bonus: bonusScore,
+    total: durationScore + prepareScore + bonusScore
+  };
+}
+
+// 睡眠银行总积分
+function calcTotalSleepBank() {
+  let total = INITIAL_SLEEP_BANK;
+  for (const key in store) {
+    if (key.startsWith('_')) continue;
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(key)) continue;
+    const score = calcSleepScore(key);
+    total += score.total;
+  }
+  return total;
+}
+
+// 月度积分（主卡用）。没有任何真实记录、且当月也未给定初始值的月份
+// （即你开始使用前的月份，比如前六个月）返回 null，让界面显示“-”，
+// 而不是把 0 当成“有 0 分”误导。
+function calcMonthSleepScore(dateStr) {
+  const [y, m] = dateStr.split('-').map(Number);
+  const month = m;
+  // 起始日之前的整月：还没开始统计，显示“-”（即使翻看时建出过全默认的幽灵真实天）
+  if (isMonthBeforeStart(y, month)) return null;
+  let base = MONTH_INITIALS[month] || 0;
+  let hasRecord = false;
+  for (const key in store) {
+    if (key.startsWith('_')) continue;
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(key)) continue;
+    const d = store[key];
+    if (!isRealDayData(d)) continue; // 排除幽灵空天 / 仅派生的假数据天
+    const [ky, km] = key.split('-').map(Number);
+    if (ky === y && km === month) {
+      const score = calcSleepScore(key);
+      base += score.total;
+      hasRecord = true;
+    }
+  }
+  if (!hasRecord && MONTH_INITIALS[month] === undefined) return null;
+  return base;
+}
+
+// 指定年份、月份累计睡眠积分；该月无任何真实记录时返回 null（用于显示“-”）
+function getMonthScore(year, month) {
+  // 起始日之前的整月：还没开始统计，显示“-”（即使翻看时建出过全默认的幽灵真实天）
+  if (isMonthBeforeStart(year, month)) return null;
+  let hasRecord = false;
+  let total = MONTH_INITIALS[month] || 0;
+  for (const key in store) {
+    if (key.startsWith('_')) continue;
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(key)) continue;
+    const d = store[key];
+    if (!isRealDayData(d)) continue; // 排除幽灵空天 / 仅派生的假数据天（否则空月份会误显 +0）
+    const [ky, km] = key.split('-').map(Number);
+    if (ky === year && km === month) {
+      hasRecord = true;
+      const s = calcSleepScore(key);
+      total += s.total;
+    }
+  }
+  return hasRecord ? total : null;
+}
+const MONTH_NAMES = ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+
+function getMonthName(m) { return MONTH_NAMES[m - 1] || ''; }
+
+// ===== 工作时间银行积分计算 =====
+function calcWorkScore(dateStr) {
+  const d = getDayData(dateStr);
+  const dayType = getDayType(dateStr);
+  let score = 0;
+  if (dayType === 'workday') {
+    if (d.workLeaveOnTime) score += 15;
+  } else {
+    if (d.weekendQuality === 'low') score += 20;
+    else if (d.weekendQuality === 'mid') score += 40;
+    else if (d.weekendQuality === 'high') score += 80;
+  }
+  const overtime = Number(d.workOvertime) || 0;
+  score -= overtime;
+  // 出差打卡且工作韧性余额不足 5 分：改扣 500 工作银行积分（不影响加班正常扣除）
+  if (d.workBusinessTrip) {
+    const before = calcTotalWorkTenacityExcl(dateStr);
+    if (before < 5) score -= 500;
+  }
+  return score;
+}
+
+function calcTotalWorkBank() {
+  let total = INITIAL_WORK_BANK;
+  for (const key in store) {
+    if (key.startsWith('_')) continue;
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(key)) continue;
+    if (key < WORK_BANK_INIT_DATE) continue;
+    total += calcWorkScore(key);
+  }
+  return total;
+}
+
+// 准时下班连续天数（跳过周末/节假日，每满5天清零重新计数）
+// 注意：只有当前日期为工作日时才可能获得bonus（周末不打卡准时下班）
+function calcWorkPunctualStreak(dateStr) {
+  const isWorkday = getDayType(dateStr) === 'workday';
+  let totalStreak = 0;
+  const cur = parseDate(dateStr);
+  for (let i = 0; i < 365; i++) {
+    const checkStr = fmtDate(cur);
+    if (getDayType(checkStr) === 'holiday') {
+      cur.setDate(cur.getDate() - 1);
+      continue;
+    }
+    const d = getDayData(checkStr);
+    if (d.workLeaveOnTime) {
+      totalStreak++;
+      cur.setDate(cur.getDate() - 1);
+    } else {
+      break;
+    }
+  }
+  const inCycle = totalStreak % 5;
+  const streak = inCycle === 0 && totalStreak > 0 ? 5 : inCycle;
+  // 只有工作日才获得准时下班bonus
+  const bonus = (isWorkday && totalStreak > 0 && totalStreak % 5 === 0) ? 1 : 0;
+  return { streak, bonus };
+}
+
+// 专注时间>200min连续天数（跳过周末/节假日，每满5天清零重新计数）
+// 注意：只有当前日期为工作日时才可能获得bonus
+function calcWorkFocusStreak(dateStr) {
+  const isWorkday = getDayType(dateStr) === 'workday';
+  let totalStreak = 0;
+  const cur = parseDate(dateStr);
+  for (let i = 0; i < 365; i++) {
+    const checkStr = fmtDate(cur);
+    if (getDayType(checkStr) === 'holiday') {
+      cur.setDate(cur.getDate() - 1);
+      continue;
+    }
+    const d = getDayData(checkStr);
+    if (d.workFocusChecked) {
+      totalStreak++;
+      cur.setDate(cur.getDate() - 1);
+    } else {
+      break;
+    }
+  }
+  const inCycle = totalStreak % 5;
+  const streak = inCycle === 0 && totalStreak > 0 ? 5 : inCycle;
+  const bonus = (isWorkday && totalStreak > 0 && totalStreak % 5 === 0) ? 3 : 0;
+  return { streak, bonus };
+}
+
+// 周末/节假日连续高质量统计
+function calcWeekendHighQualityStreak(dateStr) {
+  if (getDayType(dateStr) !== 'holiday') return { streak: 0, bonus: 0 };
+  const d = getDayData(dateStr);
+  if (d.weekendQuality !== 'high') return { streak: 0, bonus: 0 };
+  let streak = 1;
+  const cur = parseDate(dateStr);
+  cur.setDate(cur.getDate() - 1);
+  for (let i = 0; i < 365; i++) {
+    const checkStr = fmtDate(cur);
+    if (getDayType(checkStr) !== 'holiday') break;
+    const checkD = getDayData(checkStr);
+    if (checkD.weekendQuality === 'high') {
+      streak++;
+      cur.setDate(cur.getDate() - 1);
+    } else break;
+  }
+  let bonus = 0;
+  if (streak === 2) bonus = 2;
+  else if (streak >= 3) bonus = 1;
+  return { streak, bonus };
+}
+
+// 工作韧性总积分（排除指定日期当天的 _workTenacityToday）
+function calcTotalWorkTenacityExcl(dateStr) {
+  let total = (store._workTenacityBase === undefined) ? INITIAL_WORK_TENACITY : store._workTenacityBase;
+  for (const key in store) {
+    if (key.startsWith('_')) continue;
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(key)) continue;
+    if (key === dateStr) continue;
+    if (key > currentDate) continue;
+    const t = store[key]._workTenacityToday;
+    if (t !== undefined && t !== null && !isNaN(t)) total += t;
+  }
+  return total;
+}
+
+// 今日工作韧性积分
+function calcWorkTenacityToday(dateStr) {
+  const punctual = calcWorkPunctualStreak(dateStr);
+  const focus = calcWorkFocusStreak(dateStr);
+  const weekend = calcWeekendHighQualityStreak(dateStr);
+  const d = getDayData(dateStr);
+  const voucher = d.workVoucher ? -10 : 0;
+  let total = punctual.bonus + focus.bonus + weekend.bonus + voucher;
+  // 出差打卡：当日扣 5 工作韧性（韧性余额≥5 时）
+  if (d.workBusinessTrip) {
+    const before = calcTotalWorkTenacityExcl(dateStr);
+    if (before >= 5) total -= 5;
+  }
+  return {
+    punctual: punctual.bonus,
+    focus: focus.bonus,
+    weekend: weekend.bonus,
+    voucher: voucher,
+    total: total
+  };
+}
+
+function calcTotalWorkTenacity() {
+  return calcTotalWorkTenacityAsOf(currentDate);
+}
+
+function calcTotalWorkTenacityAsOf(dateStr) {
+  let total = (store._workTenacityBase === undefined) ? INITIAL_WORK_TENACITY : store._workTenacityBase;
+  for (const key in store) {
+    if (key.startsWith('_')) continue;
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(key)) continue;
+    if (key > dateStr) continue;
+    const t = store[key]._workTenacityToday;
+    if (t !== undefined && t !== null && !isNaN(t)) total += t;
+  }
+  return total;
+}
+
+// ===== 年银行结算 =====
+// 睡眠银行韧性折算倍率 24；工作银行韧性折算倍率 12
+const SLEEP_SETTLE_RATE = 24;
+const WORK_SETTLE_RATE = 12;
+
+// 判断某天是否为“真实记录的一天”。
+// 真实一天 = 有任意用户输入字段，或被 app 初始化过（带 sleepSkills 等）。
+// 注意排除两类幽灵天：
+//  1) {} 空天（getDayData 跨年探测时建出，毫无字段）；
+//  2) 仅含派生韧性字段（_tenacityToday / _workTenacityToday）的空天——
+//     旧版“批量重算”曾给探测空天写过 _tenacityToday 并持久化，若不当成幽灵，
+//     它们会被误判成“有数据”，从而凭空造出 2024/2025 的年积分、并让空月份显示 +0。
+const _DERIVED_KEYS = ['_tenacityToday', '_workTenacityToday'];
+function isRealDayData(d) {
+  if (!d) return false;
+  const keys = Object.keys(d);
+  if (keys.length === 0) return false;           // 纯空天
+  const onlyDerived = keys.every(k => _DERIVED_KEYS.includes(k));
+  return !onlyDerived;                            // 只要还有任意其它字段，即为真实记录
+}
+
+// 取所有“有真实数据”的年份（升序）。
+// 关键修复：必须排除 getDayData 在跨年回溯探测打卡连续性时自动建出的“幽灵天”。
+// 否则 2024 这类幽灵年份会被当成“最早数据年份”，偷走 INITIAL_* 基数，
+// 导致真实年份（如 2025）的年积分从 -13533 暴跌到 ~-4500（即用户看到的 -5000）。
+function getAllDataYears() {
+  const set = new Set();
+  for (const key in store) {
+    if (key.startsWith('_')) continue;
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(key)) continue;
+    if (!isRealDayData(store[key])) continue; // 跳过幽灵空天 / 仅派生的假数据天
+    set.add(Number(key.split('-')[0]));
+  }
+  return Array.from(set).sort((a, b) => a - b);
+}
+
+// 最早有数据的年份（INITIAL_* 基数归属该年）
+function getMinDataYear() {
+  const ys = getAllDataYears();
+  return ys.length ? ys[0] : Number(currentDate.split('-')[0]);
+}
+
+// 年基数：仅有数据的最早年份带 INITIAL_* 基数，其余年份从 0 起算
+function getYearBase(year, isSleep) {
+  return (year === getMinDataYear()) ? (isSleep ? INITIAL_SLEEP_BANK : INITIAL_WORK_BANK) : 0;
+}
+
+// 指定年份的睡眠积分之和（截至 dateStr）
+function sumYearSleepScores(year, dateStr) {
+  let total = 0;
+  for (const key in store) {
+    if (key.startsWith('_')) continue;
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(key)) continue;
+    if (Number(key.split('-')[0]) !== year) continue;
+    if (dateStr && key > dateStr) continue;
+    total += calcSleepScore(key).total;
+  }
+  return total;
+}
+
+// 指定年份的工作积分之和（截至 dateStr，遵循 WORK_BANK_INIT_DATE 下限）
+function sumYearWorkScores(year, dateStr) {
+  let total = 0;
+  for (const key in store) {
+    if (key.startsWith('_')) continue;
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(key)) continue;
+    if (key < WORK_BANK_INIT_DATE) continue;
+    if (Number(key.split('-')[0]) !== year) continue;
+    if (dateStr && key > dateStr) continue;
+    total += calcWorkScore(key);
+  }
+  return total;
+}
+
+// 当前年份睡眠银行年积分（已结算年份直接取记录；否则截至查看日累计）
+function calcSleepYearPoints(dateStr) {
+  const year = Number(dateStr.split('-')[0]);
+  const _S = store._sleepYearSettlements || {};
+  if (_S[year] !== undefined) return _S[year];
+  return getYearBase(year, true) + sumYearSleepScores(year, dateStr);
+}
+
+// 当前年份工作银行年积分（已结算年份直接取记录；否则截至查看日累计）
+function calcWorkYearPoints(dateStr) {
+  const year = Number(dateStr.split('-')[0]);
+  const _W = store._workYearSettlements || {};
+  if (_W[year] !== undefined) return _W[year];
+  return getYearBase(year, false) + sumYearWorkScores(year, dateStr);
+}
+
+// 某年结算分 = 年基数 + 年积分 + 剩余韧性×倍率
+// 注意：必须以"该年 12-31"为基准日取数，不能依赖 currentDate（今天），
+// 否则跨年查看时会把今年韧性折算进往年结算，或只累计到今天而非全年。
+function calcSleepSettlementScore(year) {
+  const ref = year + '-12-31';
+  return getYearBase(year, true) + sumYearSleepScores(year, ref) + calcTotalTenacityAsOf(ref) * SLEEP_SETTLE_RATE;
+}
+function calcWorkSettlementScore(year) {
+  const ref = year + '-12-31';
+  return getYearBase(year, false) + sumYearWorkScores(year, ref) + calcTotalWorkTenacityAsOf(ref) * WORK_SETTLE_RATE;
+}
+
+// 【已移除】原先的 clearSleepResilience / clearWorkResilience 会把韧性基数
+// （_tenacityBase / _workTenacityBase）改写成 -sum，等于年终清零用户的累计韧性。
+// 这是未经你授权擅自加的，会破坏累计韧性显示（例如把韧性变成 -3）并污染年结算。
+// 韧性基数就是你在开始使用时给的初始值，应当始终累计，绝不被任何结算逻辑改写。
+function noopResilience() {}
+
+// 该年是否“有真实数据”：用与 getAllDataYears 一致的 isRealDayData 判定，
+// 排除纯空天以及“仅含派生韧性字段”的幽灵天（旧版批量重算曾给探测空天写过 _tenacityToday，
+// 若算作真实数据，会凭空造出 2024/2025 的年积分，污染“累计总积分”）。
+function yearHasRealData(Y) {
+  for (const key in store) {
+    if (key.startsWith('_')) continue;
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(key)) continue;
+    if (Number(key.split('-')[0]) !== Y) continue;
+    if (isRealDayData(store[key])) return true;
+  }
+  return false;
+}
+
+// 年结算固化：把已真实跨年的往年（Y < 当前年）结算值固化进记录，
+// 避免往年结算记录丢失后“年积分”在结算值/累计值之间反复跳变。
+// 当前年必须等到 12-31 当天才结算（与历史行为一致）。
+// 注意：这里【不再清零韧性基数】——韧性基数是你给的初始值，应始终累计。
+function ensureYearSettlements() {
+  // 先清理“无真实数据年份”的陈旧结算记录（如探测产生的幽灵 2024 记录），
+  // 否则这些假记录会混进“累计总积分”。
+  for (const Y of Object.keys(store._sleepYearSettlements).map(Number)) {
+    if (!yearHasRealData(Y)) delete store._sleepYearSettlements[Y];
+  }
+  for (const Y of Object.keys(store._workYearSettlements).map(Number)) {
+    if (!yearHasRealData(Y)) delete store._workYearSettlements[Y];
+  }
+
+  const cur = parseDate(currentDate);
+  const curYear = cur.getFullYear();
+  const isCurYearEnd = (cur.getFullYear() === curYear && cur.getMonth() === 11 && cur.getDate() === 31);
+  const years = getAllDataYears().filter(Y => yearHasRealData(Y));
+  let changed = false;
+  for (const Y of years) {
+    if (store._sleepYearSettlements[Y] !== undefined) continue;
+    // 往年（已真实跨年）或当前年恰逢 12-31：结算并固化
+    if (Y < curYear || (Y === curYear && isCurYearEnd)) {
+      store._sleepYearSettlements[Y] = calcSleepSettlementScore(Y);
+      changed = true;
+    }
+  }
+  for (const Y of years) {
+    if (store._workYearSettlements[Y] !== undefined) continue;
+    if (Y < curYear || (Y === curYear && isCurYearEnd)) {
+      store._workYearSettlements[Y] = calcWorkSettlementScore(Y);
+      changed = true;
+    }
+  }
+  if (changed) saveStore();
+}
+
+// 睡眠银行年结算弹窗
+function showSleepYearSettlement() {
+  const settledYears = Object.keys(store._sleepYearSettlements).map(Number).sort((a, b) => a - b);
+  let rows = '', grand = 0;
+  for (const Y of settledYears) {
+    const v = store._sleepYearSettlements[Y];
+    grand += v;
+    rows += `<div class="popup-row"><span>${Y}年结算</span><span style="color:${v >= 0 ? 'var(--green)' : 'var(--red)'}">${v >= 0 ? '+' : ''}${v}</span></div>`;
+  }
+  const curYear = Number(currentDate.split('-')[0]);
+  if (store._sleepYearSettlements[curYear] === undefined) {
+    const v = calcSleepYearPoints(currentDate);
+    grand += v;
+    rows += `<div class="popup-row"><span>${curYear}年（进行中）</span><span style="color:${v >= 0 ? 'var(--green)' : 'var(--red)'}">${v >= 0 ? '+' : ''}${v}</span></div>`;
+  }
+  rows += `<div class="popup-row" style="font-weight:600;border-top:1px solid var(--border);margin-top:6px;padding-top:6px;"><span>累计总积分</span><span>${grand}</span></div>`;
+  showPopup(`<h3>睡眠银行年结算</h3>${rows}<button class="popup-close" onclick="closePopup()">关闭</button>`);
+}
+
+// 工作银行年结算弹窗
+function showWorkYearSettlement() {
+  const settledYears = Object.keys(store._workYearSettlements).map(Number).sort((a, b) => a - b);
+  let rows = '', grand = 0;
+  for (const Y of settledYears) {
+    const v = store._workYearSettlements[Y];
+    grand += v;
+    rows += `<div class="popup-row"><span>${Y}年结算</span><span style="color:${v >= 0 ? 'var(--green)' : 'var(--red)'}">${v >= 0 ? '+' : ''}${v}</span></div>`;
+  }
+  const curYear = Number(currentDate.split('-')[0]);
+  if (store._workYearSettlements[curYear] === undefined) {
+    const v = calcWorkYearPoints(currentDate);
+    grand += v;
+    rows += `<div class="popup-row"><span>${curYear}年（进行中）</span><span style="color:${v >= 0 ? 'var(--green)' : 'var(--red)'}">${v >= 0 ? '+' : ''}${v}</span></div>`;
+  }
+  rows += `<div class="popup-row" style="font-weight:600;border-top:1px solid var(--border);margin-top:6px;padding-top:6px;"><span>累计总积分</span><span>${grand}</span></div>`;
+  showPopup(`<h3>工作时间银行年结算</h3>${rows}<button class="popup-close" onclick="closePopup()">关闭</button>`);
+}
+
+// ===== 韧性积分计算 =====
+
+// 「准备睡觉时间」连击规则变更日：2026-09-14 起阈值由 ≤23:00(+1) 改为 ≤22:30(+2)。
+// 说明：09-13 那天记录的是「09-12 晚→09-13 早」的睡眠，那一晚规则尚未变更，
+// 所以 09-13 仍按旧规则判；09-14 记录的是「09-13 晚→09-14 早」，是新规则第一晚。
+// 该日之前的日期仍按旧规则 ≤23:00(+1) 计算，保证历史规则与积分统计不变；
+// 且连击计数逐日按「当天生效的规则」判定，因此 09-14 会自然继承 09-13 的连击进度。
+const PREP_RULE_CHANGE_DATE = '2026-09-14';
+
+// 「准备睡觉时间是否达标」：按日期选用对应阈值。
+//  - 2026-09-13 起：≤22:30（totalMin<=1350）
+//  - 之前：≤23:00（totalMin<=1380）
+// 下界统一为 20:00（防止把凌晨等不合理时间算作"准备睡觉"）。
+function isPrepareSleepOnTime(d, dateStr) {
+  if (!d.sleepPrepareTime) return false;
+  const [h, m] = d.sleepPrepareTime.split(':').map(Number);
+  const totalMin = h * 60 + m;
+  const isNewRule = !!dateStr && dateStr >= PREP_RULE_CHANGE_DATE;
+  const upper = isNewRule ? (22 * 60 + 30) : (23 * 60);
+  return totalMin >= 20 * 60 && totalMin <= upper;
+}
+
+// 「准备睡觉连击」完成时发放的分值：2026-09-13 起 +2，之前 +1。
+function prepareStreakBonus(dateStr) {
+  return (dateStr >= PREP_RULE_CHANGE_DATE) ? 2 : 1;
+}
+
+function calcTenacityToday(dateStr) {
+  // 检查三项连续打卡
+  let t1 = 0, t2 = 0, t3 = 0;
+
+  // 打卡1: 连续3天睡眠时长>=450
+  if (checkConsecutive(dateStr, 3, (d) => Number(d.sleepDuration) >= 450)) t1 = 1;
+
+  // 打卡2: 连续3天准备睡觉时间达标（2026-09-13 前 ≤23:00 记 +1；之后 ≤22:30 记 +2）
+  if (checkConsecutive(dateStr, 3, isPrepareSleepOnTime)) t2 = prepareStreakBonus(dateStr);
+
+  // 打卡3: 连续3天入睡时间<=00:00，且入睡时间在20:00-23:59范围内
+  if (checkConsecutive(dateStr, 3, (d) => {
+    if (!d.sleepFallAsleepTime) return false;
+    const [h, m] = d.sleepFallAsleepTime.split(':').map(Number);
+    const totalMin = h * 60 + m;
+    return totalMin >= 20 * 60 && totalMin <= 23 * 60 + 59;
+  })) t3 = 3;
+
+  const d = getDayData(dateStr);
+
+  // 使用韧性积分（即「是否兑换抵押券」勾选）的扣分：
+  //   2026-09-28 之前：固定 -10（历史不变）
+  //   2026-09-28 起：按当日「准备睡觉时间」浮动 ——
+  //     · 未填准备睡觉时间 → 扣满 10 分
+  //     · ≤02:00 → 7 分
+  //     · 02:00 之后每超 1 小时多扣 0.5 分（不满 1 小时按 1 小时算），封顶 10 分
+  //       02:01–03:00 → 7.5；03:01–04:00 → 8；04:01–05:00 → 8.5；
+  //       05:01–06:00 → 9；06:01–07:00 → 9.5；07:01 以后 → 10
+  const voucher = d.voucherExchanged ? -voucherDeductionAmount(dateStr) : 0;
+
+  // 贷款利息：勾选「贷款中」时，按当天填写的数额扣除韧性积分
+  const loanAmt = d.loanActive ? (Number(d.loanInterest) || 0) : 0;
+  const loan = loanAmt > 0 ? -loanAmt : 0;
+
+  // 时光穿越·蝴蝶效应 1d3：当日韧性额外扣除
+  const butterfly = (d.timeTravel && d.timeTravel.butterfly !== '' && d.timeTravel.butterfly != null && d.timeTravel.butterfly !== '-')
+    ? Number(d.timeTravel.butterfly) : 0;
+  const btfVal = butterfly > 0 ? -butterfly : 0;
+
+  // 周结算加分（仅周日触发）
+  let weekly = 0;
+  const dow = getDayOfWeek(parseDate(dateStr));
+  if (dow === 0) {
+    const w = calcWeeklyTenacity(dateStr);
+    weekly = w.w1 + w.w2;
+  }
+
+  return { t1, t2, t3, voucher, loan, butterfly: btfVal, weekly, total: t1 + t2 + t3 + voucher + loan + btfVal + weekly };
+}
+
+// 「使用韧性积分」（抵押券勾选）的规则变更日：2026-09-28 起按准备睡觉时间浮动扣分
+const VOUCHER_RULE_CHANGE_DATE = '2026-09-28';
+
+// 某日「使用韧性积分」的扣分额（正数，扣分时取负）
+//  - 规则变更日之前：固定 10
+//  - 变更日起：
+//      未填准备睡觉时间 → 10（扣满）
+//      ≤02:00 → 7
+//      之后每超 1 小时 +0.5（不满 1 小时按 1 小时算），封顶 10
+function voucherDeductionAmount(dateStr) {
+  if (!dateStr || dateStr < VOUCHER_RULE_CHANGE_DATE) return 10;
+  const d = getDayData(dateStr);
+  const t = d.sleepPrepareTime;
+  if (!t) return 10;
+  const [h, m] = String(t).split(':').map(Number);
+  if (isNaN(h) || isNaN(m)) return 10;
+  const totalMin = h * 60 + m;
+  const baseMin = 2 * 60; // 02:00
+  if (totalMin <= baseMin) return 7;
+  const overMin = totalMin - baseMin;
+  const extraHours = Math.ceil(overMin / 60);   // 不满 1 小时按 1 小时算
+  const amt = 7 + extraHours * 0.5;
+  return Math.min(10, amt);
+}
+
+// 界面文案：说明这次扣了多少、以及为什么
+function voucherDeductionNote(dateStr) {
+  const amt = voucherDeductionAmount(dateStr);
+  if (!dateStr || dateStr < VOUCHER_RULE_CHANGE_DATE) return '使用1张抵押券（-10韧性积分，已计入本日）';
+  const d = getDayData(dateStr);
+  const t = d.sleepPrepareTime;
+  if (!t) return '使用韧性积分：未填准备睡觉时间，扣满 -10韧性积分（已计入本日）';
+  return `使用韧性积分：准备睡觉时间 ${t}，扣除 -${amt} 韧性积分（已计入本日）`;
+}
+
+// ===== 抵押券台账 =====
+// 规则（以你的实际操作为准）：勾了抵押券就扣当天的 -10；
+// 时光穿越是否取消它，完全由你手动回到那天改勾选框决定，页面只记录判定与蝴蝶效应。
+function getVoucherDays() {
+  const days = Object.keys(store)
+    .filter(k => /^\d{4}-\d{2}-\d{2}$/.test(k))
+    .sort();
+  const exchanged = days.filter(k => store[k] && store[k].voucherExchanged);
+  return { days, exchanged };
+}
+
+// 清理旧版本遗留的“自动取消/自动承接”痕迹（v2.1 早前版本曾自作主张搬动 -10，
+// 这正是 9.12 抵押券扣分“回滚”的根因）。加载时无条件清掉，让每张券回到“勾了就扣”。
+function healVoucherState() {
+  const notes = [];
+  const tt = store._timeTravel || (store._timeTravel = { lastUseDate: '', lastResult: '' });
+  if (tt.cancelledVoucherDate !== undefined) { delete tt.cancelledVoucherDate; notes.push('清除旧版自动取消记录 cancelledVoucherDate'); }
+  if (tt.cancelledLaunchDate !== undefined) { delete tt.cancelledLaunchDate; notes.push('清除旧版记录 cancelledLaunchDate'); }
+  for (const k of Object.keys(store)) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(k)) continue;
+    if (store[k] && store[k].voucherMovedIn) { delete store[k].voucherMovedIn; notes.push(`清除旧版自动承接标记：${k}`); }
+  }
+  return notes;
+}
+
+// 修正时光穿越的“不可能状态”：有冷却记录，但那天根本没有投掷值
+function healTimeTravelState() {
+  const notes = [];
+  const u = store._timeTravel || (store._timeTravel = { lastUseDate: '', lastResult: '' });
+  if (u.lastUseDate) {
+    const d = store[u.lastUseDate];
+    const roll = d && d.timeTravel ? d.timeTravel.roll : undefined;
+    if (roll === undefined || roll === null || roll === '') {
+      notes.push(`清除无效的技能使用记录：${u.lastUseDate}（当天没有投掷值，属误触）`);
+      u.lastUseDate = '';
+      u.lastResult = '';
+    }
+  }
+  return notes;
+}
+
+// 重算全部「真实日」的派生韧性（不新建任何空天）
+function refreshTenacityDerived() {
+  for (const k of Object.keys(store)) {
+    if (k.startsWith('_')) continue;
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(k)) continue;
+    if (!isRealDayData(store[k])) continue;
+    store[k]._tenacityToday = calcTenacityToday(k).total;
+  }
+}
+
+function showVoucherLedger() {
+  const st = getVoucherDays();
+  const problems = selfTest();
+  let rows = '';
+  if (st.exchanged.length) {
+    st.exchanged.forEach(k => {
+      rows += `<div class="popup-row"><span>${k} 使用韧性积分</span><span>-${voucherDeductionAmount(k)} 扣于当日</span></div>`;
+    });
+  } else {
+    rows += `<div class="popup-row"><span>抵押券记录</span><span>暂无</span></div>`;
+  }
+  const _TT_LABEL = { crit: '大成功', normal: '成功', fumble: '大失败', fail: '失败', pending: '待判定' };
+  const tt = store._timeTravel || {};
+  rows += `<div class="popup-row" style="border-top:1px solid var(--border);margin-top:6px;padding-top:6px;"><span>时光穿越·最后使用</span><span>${tt.lastUseDate || '—'}${tt.lastResult ? '（' + (_TT_LABEL[tt.lastResult] || tt.lastResult) + '）' : ''}</span></div>`;
+  const cdEnd = getTimeTravelCooldownEnd();
+  rows += `<div class="popup-row"><span>冷却状态</span><span>${cdEnd ? '冷却至 ' + cdEnd : '无冷却'}</span></div>`;
+  if (tt.lastUseDate) {
+    rows += `<div style="margin:6px 0;"><button class="popup-close" style="position:static;" onclick="clearTimeTravelUsage()">我没用过，解除冷却</button></div>`;
+  }
+  const realDays = st.days.filter(k => isRealDayData(store[k]));
+  rows += `<div class="popup-row"><span>数据条数</span><span>${realDays.length} 天${realDays.length ? '（' + realDays[0] + ' ~ ' + realDays[realDays.length - 1] + '）' : ''}</span></div>`;
+  rows += `<div class="popup-row"><span>当前地址</span><span style="font-size:0.7rem;word-break:break-all;">${location.origin}${location.pathname}</span></div>`;
+  rows += `<div class="popup-row"><span>自检</span><span style="color:${problems.length ? 'var(--red)' : 'var(--green)'}">${problems.length ? problems.length + ' 项异常' : '通过'}</span></div>`;
+  rows += `<div style="font-size:0.7rem;color:var(--text-muted);margin:8px 0 4px;line-height:1.5;">注意：数据只存在当前这个网址里。「127.0.0.1:8000 / 分享链接 / 另一台设备」是互不相通的三份数据，在哪边填的就只能在同网址看到。</div>`;
+  rows += `<div style="display:flex;gap:8px;margin-top:10px;">
+      <button class="popup-close" style="position:static;" onclick="exportStoreData()">导出全部数据（给助手核对）</button>
+      <button class="popup-close" style="position:static;" onclick="showImportDialog()">导入数据（覆盖恢复）</button>
+      <button class="popup-close" onclick="closePopup()">关闭</button>
+    </div>`;
+  showPopup(`<h3>抵押券台账 · 数据诊断</h3>${rows}`);
+}
+
+
+// 检查某天的前一天是否为不眠者（身份10）
+function isPrevDayInsomniac(dateStr) {
+  const prevDate = getPrevDateStr(dateStr);
+  const prevData = getDayData(prevDate);
+  return Number(prevData.sleepIdentity) === 10;
+}
+
+// 计算连续天数（从 dateStr 往前数，包括当天）
+// 如果前一天是不眠者，当天暂停统计，连续天数保持不变
+function countConsecutive(dateStr, checkFn) {
+  // 如果前一天是不眠者，跳过当天，从前一天继续往前数
+  if (isPrevDayInsomniac(dateStr)) {
+    const prevDate = getPrevDateStr(dateStr);
+    return countConsecutive(prevDate, checkFn);
+  }
+
+  const d = parseDate(dateStr);
+  let count = 0;
+  for (let i = 0; i < 365; i++) {
+    const checkDate = new Date(d);
+    checkDate.setDate(checkDate.getDate() - i);
+    const checkStr = fmtDate(checkDate);
+    const dayData = getDayData(checkStr);
+
+    // 如果当前检查天的前一天是不眠者，跳过当前天（暂停一天）
+    if (i > 0 && isPrevDayInsomniac(checkStr)) {
+      continue;
+    }
+
+    // 把日期一并传给判定函数：部分规则按日期切换阈值（如准备睡觉时间的规则变更）
+    if (checkFn(dayData, checkStr)) {
+      count++;
+    } else {
+      break;
+    }
+  }
+  return count;
+}
+
+function checkConsecutive(dateStr, n, checkFn) {
+  // 连续 n 天达标时仅在第 n 天、第 2n 天……触发奖励（满 n 天清零重新累计）
+  const total = countConsecutive(dateStr, checkFn);
+  return total > 0 && total % n === 0;
+}
+
+// 计算当前连续周期内的天数（每满 3 天清零，用于界面显示 1/2/3）
+function getStreakCycleCount(dateStr, checkFn) {
+  const total = countConsecutive(dateStr, checkFn);
+  return ((total - 1) % 3) + 1;
+}
+
+function calcTotalTenacity() {
+  return calcTotalTenacityAsOf(currentDate);
+}
+
+// 截止到指定日期（含）的韧性总额；用于年结算时按"该年 12-31"而非"今天"取数，
+// 避免往年结算把今年（及以后）的韧性也折算进去。
+function calcTotalTenacityAsOf(dateStr) {
+  let total = (store._tenacityBase === undefined) ? INITIAL_TENACITY : store._tenacityBase;
+  for (const key in store) {
+    if (key.startsWith('_')) continue;
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(key)) continue;
+    if (key > dateStr) continue;
+    const t = store[key]._tenacityToday;
+    if (t !== undefined && t !== null && !isNaN(t)) total += t;
+  }
+  return total;
+}
+
+// ===== 时光穿越技能 =====
+// 独立判定：投掷 1=大成功、108=大失败、≤30=成功、31-99=失败；没有极难/困难/普通分级
+function judgeTimeTravel(roll) {
+  if (roll === null || roll === undefined || roll === '' || isNaN(roll)) return { result: 'pending', label: '待判定', cls: 'result-pending' };
+  const r = Number(roll);
+  if (r === 1) return { result: 'crit', label: '大成功', cls: 'result-crit' };
+  if (r === 108) return { result: 'fumble', label: '大失败', cls: 'result-fumble' };
+  if (r <= 30) return { result: 'normal', label: '成功', cls: 'result-normal' };
+  return { result: 'fail', label: '失败', cls: 'result-fail' };
+}
+
+// 冷却结束日期（YYYY-MM-DD）；未使用过返回 null
+function getTimeTravelCooldownEnd() {
+  const u = store._timeTravel;
+  if (!u || !u.lastUseDate) return null;
+  const days = u.lastResult === 'fumble' ? 30 : 14;
+  const end = parseDate(u.lastUseDate);
+  end.setDate(end.getDate() + days);
+  return fmtDate(end);
+}
+
+// 当前查看日是否处于冷却期（用于技能交互：当天使用后仍可展开查看结果，仅后续日期视为冷却）
+function isTimeTravelCooling(dateStr) {
+  const u = store._timeTravel;
+  if (!u || !u.lastUseDate) return false;
+  const days = u.lastResult === 'fumble' ? 30 : 14;
+  const last = parseDate(u.lastUseDate);
+  last.setDate(last.getDate() + days);
+  const endStr = fmtDate(last);
+  // 仅当查看日严格晚于最后一次使用日，且未超过冷却截止日时视为冷却
+  return dateStr > u.lastUseDate && dateStr <= endStr;
+}
+
+// 倒推最近一次使用抵押券的日期（不含当天发动日；从前一天开始找）
+function findLastVoucherDate(dateStr) {
+  const cur = parseDate(dateStr);
+  cur.setDate(cur.getDate() - 1); // 从前一天开始
+  for (let i = 0; i < 365; i++) {
+    const d = new Date(cur);
+    d.setDate(d.getDate() - i);
+    const s = fmtDate(d);
+    const day = getDayData(s);
+    if (day.voucherExchanged) {
+      return s;
+    }
+  }
+  return null;
+}
+
+// 切换技能框展开/折叠（冷却期不允许展开）
+let timeTravelOpen = false;
+function toggleTimeTravel() {
+  if (isTimeTravelCooling(currentDate)) return;
+  timeTravelOpen = !timeTravelOpen;
+  renderTenacity();
+}
+
+// ===== 时光穿越：投掷值必须「先填草稿、再点确认」才生效 =====
+// 之前输入框一改就立刻落库并进冷却，点一下数字框的上下箭头（空→1＝大成功）
+// 也会被视为用过技能、凭空进入 14 天冷却（用户反馈“我没用却在冷却中”）。
+// 现在：改输入框只改草稿，不写库、不进冷却；点「确认」才真正记录。
+let _ttDraft = {};
+
+function timeTravelShownRoll(dateStr) {
+  if (_ttDraft[dateStr] !== undefined) return _ttDraft[dateStr];
+  const d = getDayData(dateStr);
+  const r = d.timeTravel ? d.timeTravel.roll : undefined;
+  return (r === undefined || r === null) ? '' : r;
+}
+
+// 输入框变更：只更新草稿（不落库、不触发冷却）
+function onTimeTravelRollChange(value) {
+  _ttDraft[currentDate] = (value === '' || value === null) ? '' : Number(value);
+  renderTenacity();
+}
+
+// 点「确认」才把草稿写入：记录投掷值/判定/冷却，但绝不搬动任何积分。
+// 时光穿越的「取消上次抵押券」由你本人手动回到那天改勾选框完成，页面绝不代替操作。
+function confirmTimeTravelRoll() {
+  const v = timeTravelShownRoll(currentDate);
+  delete _ttDraft[currentDate];
+  applyTimeTravelRoll(v);
+}
+
+function applyTimeTravelRoll(value) {
+  const d = getDayData(currentDate);
+  const v = (value === '' || value === null) ? '' : Number(value);
+  d.timeTravel.roll = v;
+  const j = judgeTimeTravel(v);
+  d.timeTravel.result = j.result;
+
+  // 触发冷却：成功 / 大成功 / 大失败 都视为「使用过」技能
+  if (j.result === 'normal' || j.result === 'crit' || j.result === 'fumble') {
+    // 若之前尚未记录（或本次日期更晚），更新最后一次使用
+    const last = store._timeTravel;
+    if (!last.lastUseDate || currentDate >= last.lastUseDate) {
+      store._timeTravel.lastUseDate = currentDate;
+      store._timeTravel.lastResult = j.result;
+    }
+    // 大失败：清空蝴蝶效应（不允许输入）
+    if (j.result === 'fumble') d.timeTravel.butterfly = '';
+    // 大成功：自动显示"-"，用户不可输入
+    if (j.result === 'crit') d.timeTravel.butterfly = '-';
+  } else if (j.result === 'fail' || j.result === 'pending') {
+    // 普通失败 / 清空投掷：技能未发动，无蝴蝶效应输入；
+    // 若冷却记录正好来自本日，说明这次并没有真的用技能 → 撤销该记录。
+    d.timeTravel.butterfly = '';
+    undoTimeTravelUsageIfFrom(currentDate);
+  }
+  refreshTenacityDerived();
+  saveStore();
+  renderTenacity();
+}
+
+// 清空本日投掷（撤销这次使用）
+function clearTimeTravelRoll() {
+  const d = getDayData(currentDate);
+  d.timeTravel.roll = '';
+  d.timeTravel.result = 'pending';
+  d.timeTravel.butterfly = '';
+  delete _ttDraft[currentDate];
+  undoTimeTravelUsageIfFrom(currentDate);
+  refreshTenacityDerived();
+  saveStore();
+  renderTenacity();
+  showToast('已清空本日投掷，冷却记录同步撤销');
+}
+
+// 若全局「最后使用」记录来自这一天，就把它撤销（解除冷却）
+function undoTimeTravelUsageIfFrom(dateStr) {
+  const u = store._timeTravel;
+  if (u && u.lastUseDate === dateStr) { u.lastUseDate = ''; u.lastResult = ''; }
+}
+
+// 一键解除冷却：清掉全局「最后使用」记录，并抹掉那天残留的投掷/蝴蝶效应值
+function clearTimeTravelUsage() {
+  const u = store._timeTravel || (store._timeTravel = { lastUseDate: '', lastResult: '' });
+  const day = u.lastUseDate;
+  u.lastUseDate = '';
+  u.lastResult = '';
+  if (day && store[day] && store[day].timeTravel) {
+    store[day].timeTravel.roll = '';
+    store[day].timeTravel.result = 'pending';
+    store[day].timeTravel.butterfly = '';
+  }
+  refreshTenacityDerived();
+  saveStore();
+  renderTenacity();
+  showToast('已清除技能使用记录，冷却解除');
+}
+
+// 蝴蝶效应 1d3 输入：校验 1-3，落库并重算韧性
+function onButterflyChange(value) {
+  const d = getDayData(currentDate);
+  const v = (value === '' || value === null) ? '' : Number(value);
+  if (v !== '' && (v < 1 || v > 3)) return;
+  d.timeTravel.butterfly = v;
+  saveStore();
+  renderTenacity();
+}
+
+// 渲染技能框 HTML（默认折叠；冷却期强制折叠并显示提示）
+function renderTimeTravelHtml() {
+  const cooling = isTimeTravelCooling(currentDate);
+  const d = getDayData(currentDate);
+  const tt = d.timeTravel || {};
+  const open = !cooling && timeTravelOpen;
+  const cdNote = cooling ? '技能冷却中' : '';
+  const roll = timeTravelShownRoll(currentDate);
+  const j = judgeTimeTravel(roll);
+  const hasDraft = _ttDraft[currentDate] !== undefined;
+  const confirmedResult = tt.result || '';
+  let html = `<div class="skill-box" id="timeTravelBox">`;
+  html += `<div class="skill-box-header" onclick="toggleTimeTravel()">`;
+  if (cooling) {
+    html += `<span class="skill-box-name">技能:时光穿越</span>`;
+    html += `<span class="skill-box-cooldown">技能冷却中</span>`;
+  } else if (!open) {
+    html += `<span class="skill-box-name">技能:时光穿越</span>`;
+  } else {
+    html += `<span class="skill-box-name" style="color:var(--accent-2);font-weight:600;">时光穿越</span>`;
+  }
+  html += `</div>`;
+  if (open) {
+    html += `<div class="skill-box-body">`;
+    // 行 1：技能名称
+    html += `<div class="skill-box-row"><span class="row-label">技能名称</span><span class="row-val">时光穿越</span></div>`;
+    // 行 2：技能数值
+    html += `<div class="skill-box-row"><span class="row-label">技能数值</span><span class="num-val">30</span></div>`;
+    // 行 3：投掷值（草稿）+ 确认 / 清空
+    html += `<div class="skill-box-row"><span class="row-label">投掷值</span><span style="display:flex;align-items:center;gap:4px;">
+      <input type="number" min="1" max="108" value="${roll !== '' ? roll : ''}" onchange="onTimeTravelRollChange(this.value)" style="width:64px;">
+      <button class="info-btn" onclick="confirmTimeTravelRoll()">确认</button>
+      <button class="info-btn" onclick="clearTimeTravelRoll()">清空</button>
+    </span></div>`;
+    if (hasDraft) {
+      html += `<div class="skill-box-row"><span class="row-label"></span><span style="font-size:0.68rem;color:var(--orange);">投掷值已填，点「确认」后才会记录并进入冷却</span></div>`;
+    }
+    // 行 4：判定结果
+    html += `<div class="skill-box-row"><span class="row-label">判定结果</span><span class="result-badge ${j.cls}">${j.label}</span></div>`;
+    // 行 5：说明
+    html += `<div class="skill-box-row"><span class="row-label">说明</span><button class="info-btn" onclick="showSkillInfo('时光穿越')">说明</button></div>`;
+    // 扩展：成功 / 大成功（以「确认」后的结果为准）→ 抵押券时间 + 蝴蝶效应输入
+    if (confirmedResult === 'normal' || confirmedResult === 'crit') {
+      const voucherDate = findLastVoucherDate(currentDate);
+      const vText = voucherDate
+        ? `上次使用抵押券的时间为 ${Number(voucherDate.split('-')[1])}月${Number(voucherDate.split('-')[2])}日（成功后请自行回到该日，取消「是否兑换抵押券」的勾选）`
+        : '暂无抵押券使用记录';
+      html += `<div class="skill-box-extra">`;
+      html += `<div class="voucher-date">${vText}</div>`;
+      html += `<div class="btf-line">`;
+      html += `<span>蝴蝶效应1d3</span>`;
+      if (j.result === 'crit') {
+        html += `<input type="number" value="-" disabled>`;
+      } else {
+        const bv = (tt.butterfly === undefined || tt.butterfly === '') ? '' : tt.butterfly;
+        html += `<input type="number" min="1" max="3" value="${bv}" onchange="onButterflyChange(this.value)" placeholder="1-3">`;
+      }
+      html += `</div></div>`;
+    } else if (confirmedResult === 'fumble') {
+      html += `<div class="skill-box-extra"><span style="color:var(--red);">大失败：技能封印一个月（已进入冷却）</span></div>`;
+    } else if (confirmedResult === 'fail') {
+      html += `<div class="skill-box-extra"><span style="color:var(--text-muted);">失败：未使用技能，不进入冷却</span></div>`;
+    }
+    html += `</div>`;
+  }
+  // 冷却中：给出解除入口，避免「误触一下就被锁两周」无法回头
+  if (cooling) {
+    const endStr = getTimeTravelCooldownEnd();
+    html += `<div style="font-size:0.68rem;color:var(--text-dim);margin:4px 0 0;padding-left:4px;line-height:1.6;">
+      记录的使用日：${store._timeTravel.lastUseDate || '—'}${endStr ? '，冷却至 ' + endStr : ''}
+      <button class="info-btn" style="margin-left:6px;" onclick="clearTimeTravelUsage()">我没用过，解除冷却</button>
+    </div>`;
+  }
+  html += `</div>`;
+  return html;
+}
+
+// 该日是否“用抵押券抵扣了睡眠数据”：抵扣当天不参与周统计
+// （显示为“-”，周平均只用其余天数）。若时光穿越后你手动取消了勾选，该日自然恢复计入。
+function isVoucherOffset(dateStr) {
+  const d = getDayData(dateStr);
+  return !!d.voucherExchanged;
+}
+
+// 周结算检查
+function calcWeeklyTenacity(dateStr) {
+  const d = parseDate(dateStr);
+  const currentMonday = new Date(d);
+  const day = currentMonday.getDay();
+  const diff = day === 0 ? -6 : 1 - day;
+  currentMonday.setDate(currentMonday.getDate() + diff);
+
+  const prevMonday = new Date(currentMonday);
+  prevMonday.setDate(prevMonday.getDate() - 7);
+
+  // 收集本周数据
+  const thisWeekData = [];
+  const lastWeekData = [];
+  for (let i = 0; i < 7; i++) {
+    const td = new Date(currentMonday);
+    td.setDate(td.getDate() + i);
+    const tdStr = fmtDate(td);
+    const dayData = getDayData(tdStr);
+    const tdVoucher = isVoucherOffset(tdStr); // 用了抵押券 → 当天睡眠数据不计入周统计
+    thisWeekData.push({
+      date: tdStr,
+      label: getDayLabel(td),
+      duration: tdVoucher ? 0 : (Number(dayData.sleepDuration) || 0),
+      fallAsleep: tdVoucher ? '' : (dayData.sleepFallAsleepTime || ''),
+      voucher: tdVoucher
+    });
+
+    const pd = new Date(prevMonday);
+    pd.setDate(pd.getDate() + i);
+    const pdStr = fmtDate(pd);
+    const pDayData = getDayData(pdStr);
+    const pdVoucher = isVoucherOffset(pdStr);
+    lastWeekData.push({
+      date: pdStr,
+      label: getDayLabel(pd),
+      duration: pdVoucher ? 0 : (Number(pDayData.sleepDuration) || 0),
+      fallAsleep: pdVoucher ? '' : (pDayData.sleepFallAsleepTime || ''),
+      voucher: pdVoucher
+    });
+  }
+
+  // 计算平均
+  const thisWeekDurations = thisWeekData.filter(x => x.duration > 0).map(x => x.duration);
+  const lastWeekDurations = lastWeekData.filter(x => x.duration > 0).map(x => x.duration);
+
+  const thisAvgDur = thisWeekDurations.length ? thisWeekDurations.reduce((a,b)=>a+b,0) / thisWeekDurations.length : 0;
+  const lastAvgDur = lastWeekDurations.length ? lastWeekDurations.reduce((a,b)=>a+b,0) / lastWeekDurations.length : 0;
+
+  let w1 = 0, w2 = 0;
+  if (thisAvgDur > 0 && lastAvgDur > 0 && thisAvgDur - lastAvgDur >= 10) w1 = 3;
+
+  // 平均入睡时间（带符号：18:00-23:59 → 距0点负分钟；00:00=0；0点之后 → 正分钟）
+  const toSignedSleepMin = (t) => {
+    const [h, m] = t.split(':').map(Number);
+    const totalMin = h * 60 + m;
+    if (h >= 18 && h <= 23) return -(24 * 60 - totalMin); // 18:00-23:59 → 距0点负值
+    return totalMin; // 00:00-17:59 → 距0点正值
+  };
+  const thisSleepTimes = thisWeekData.filter(x => x.fallAsleep).map(x => toSignedSleepMin(x.fallAsleep));
+  const lastSleepTimes = lastWeekData.filter(x => x.fallAsleep).map(x => toSignedSleepMin(x.fallAsleep));
+
+  const thisHasData = thisSleepTimes.length > 0;
+  const lastHasData = lastSleepTimes.length > 0;
+  const thisAvgSleep = thisHasData ? thisSleepTimes.reduce((a,b)=>a+b,0) / thisSleepTimes.length : 0;
+  const lastAvgSleep = lastHasData ? lastSleepTimes.reduce((a,b)=>a+b,0) / lastSleepTimes.length : 0;
+
+  if (thisHasData && lastHasData && lastAvgSleep - thisAvgSleep >= 30) w2 = 3;
+
+  return {
+    w1, w2,
+    thisWeek: thisWeekData,
+    lastWeek: lastWeekData,
+    thisAvgDur, lastAvgDur,
+    thisAvgSleep, lastAvgSleep,
+    thisHasData, lastHasData
+  };
+}
+
+// ===== 身份回顾 =====
+function getIdentityStats(system) {
+  const stats = {};
+  for (let i = 1; i <= 10; i++) stats[i] = { success: 0, fail: 0 };
+  for (const key in store) {
+    if (key.startsWith('_')) continue;
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(key)) continue;
+    const d = store[key];
+    if (system === 'sleep') {
+      const id = Number(d.sleepIdentity);
+      if (id >= 1 && id <= 10) {
+        if (d.sleepSuccess === 'yes') stats[id].success++;
+        else if (d.sleepSuccess === 'no') stats[id].fail++;
+      }
+    } else {
+      const id = Number(d.preIdIdentity);
+      if (id >= 1 && id <= 10) {
+        if (d.preIdSuccess === 'yes') stats[id].success++;
+        else if (d.preIdSuccess === 'no') stats[id].fail++;
+      }
+    }
+  }
+  return stats;
+}
+
+function renderIdentityReview(system) {
+  const bodyId = system === 'sleep' ? 'sleepReviewBody' : 'preIdReviewBody';
+  const body = $(bodyId);
+  if (!body) return;
+  const names = system === 'sleep' ? IDENTITY_NAMES : PRE_ID_TASKS;
+  const stats = getIdentityStats(system);
+  let rows = '';
+  for (let i = 1; i <= 10; i++) {
+    rows += `<tr>
+      <td style="text-align:center;">${i}</td>
+      <td>${escapeHtml(names[i] || '—')}</td>
+      <td style="text-align:center;color:var(--green);">${stats[i].success}</td>
+      <td style="text-align:center;color:var(--red);">${stats[i].fail}</td>
+    </tr>`;
+  }
+  body.innerHTML = `<table class="review-table">
+    <thead><tr><th>序号</th><th>名称</th><th>扮演成功次数</th><th>扮演失败次数</th></tr></thead>
+    <tbody>${rows}</tbody>
+  </table>`;
+}
+
+// ===== UI 渲染 =====
+function renderAll() {
+  initDayData(currentDate);
+  // 年银行结算（惰性触发，跨年或到达 12-31 20:00 时结算已结束年份）
+  ensureYearSettlements();
+  // 重新计算金币（兼容旧数据）
+  recalcSleepCoin();
+  recalcPreIdCoin();
+  renderStatsBar();
+  renderSleepRune();
+  renderChores();
+  renderPreId();
+  renderIdentityReview('sleep');
+  renderIdentityReview('pre');
+  renderExchangeTree();
+  renderSleepBank();
+  renderTenacity();
+  renderWorkBank();
+  $('datePicker').value = currentDate;
+}
+
+function renderStatsBar() {
+  const d = getDayData(currentDate);
+  const todayCoin = calcTodayCoin(currentDate);
+  const coinPile = calcTotalCoinPile();
+  const isToday = currentDate === todayStr();
+  const dayLabel = isToday ? '今日' : '该日';
+
+  let identityName = '—';
+  if (d.sleepIdentity) identityName = IDENTITY_NAMES[Number(d.sleepIdentity)] || '—';
+
+  // 是否扮演成功（仅沉眠符咒）
+  let playResult = '—';
+  let playColor = 'var(--text-muted)';
+  if (d.sleepSuccess === 'yes') {
+    playResult = '成功';
+    playColor = 'var(--green)';
+  } else if (d.sleepSuccess === 'no') {
+    playResult = '失败';
+    playColor = 'var(--red)';
+  }
+
+  $('statsBar').innerHTML = `
+    <div class="stat-card">
+      <div class="stat-label">${dayLabel}身份</div>
+      <div class="stat-value">${identityName}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">是否扮演成功</div>
+      <div class="stat-value" style="color:${playColor};font-size:1.1rem;">${playResult}</div>
+    </div>
+    <div class="stat-card clickable" onclick="showCoinBreakdown()">
+      <div class="stat-label">${dayLabel}已获得金币</div>
+      <div class="stat-value gold">${todayCoin >= 0 ? '+' : ''}${fmtCoin(todayCoin)}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">金币堆</div>
+      <div class="stat-value gold">${fmtCoin(coinPile)}</div>
+    </div>
+  `;
+}
+
+function showCoinBreakdown() {
+  const d = getDayData(currentDate);
+  const sleepC = calcSleepCoin(currentDate);
+  const choreC = calcChoreCoin(currentDate);
+  const preIdC = calcPreIdCoin(currentDate);
+  const skillC = d.sleepSkillCoin || 0;
+
+  let skillRows = '';
+  // 芭丝特的祝福金币
+  const catSkill = d.sleepSkills ? d.sleepSkills['芭丝特的祝福'] : undefined;
+  if (catSkill !== undefined && catSkill !== null && catSkill !== '') {
+    const j = judgeSkill(catSkill, 65);
+    let catCoin = 0;
+    const extras = d.sleepSkillExtras || {};
+    if (j.result === 'crit') catCoin = 1;
+    else if (j.result === 'normal') catCoin = (Number(extras['芭丝特的祝福_d3']) || 0) * 0.1;
+    else if (j.result === 'hard') catCoin = (Number(extras['芭丝特的祝福_d3']) || 0) * 0.2;
+    else if (j.result === 'extreme') catCoin = (Number(extras['芭丝特的祝福_d3']) || 0) * 0.3;
+    else if (j.result === 'fumble') catCoin = -0.5;
+    if (catCoin !== 0) {
+      skillRows += `<div class="popup-row"><span>技能-芭丝特的祝福</span><span style="color:var(--gold)">${catCoin >= 0 ? '+' : ''}${catCoin.toFixed(1)}</span></div>`;
+    }
+  }
+  // 握烬成光金币（仅失败时发动，存储为+1.2，明细中显示+1.2）
+  const wjjcgSkill = d.sleepSkills ? d.sleepSkills['握烬成光'] : undefined;
+  if (d.sleepSuccess === 'no' && wjjcgSkill !== undefined && wjjcgSkill !== null && wjjcgSkill !== '') {
+    const j = judgeSkill(wjjcgSkill, 40);
+    if (j.result === 'crit' || j.result === 'extreme' || j.result === 'hard' || j.result === 'normal') {
+      const extras = d.sleepSkillExtras || {};
+      if (extras['握烬成光_achieved'] === true) {
+        skillRows += `<div class="popup-row"><span>技能-握烬成光</span><span style="color:var(--gold)">+1.2</span></div>`;
+      }
+    }
+  }
+
+  showPopup(`
+    <h3>${currentDate === todayStr() ? '今日' : '该日'}金币分项</h3>
+    <div class="popup-row"><span>💤 沉眠符咒</span><span style="color:var(--gold)">${sleepC >= 0 ? '+' : ''}${sleepC}</span></div>
+    ${skillRows}
+    <div class="popup-row"><span>🧾 琐事固定术</span><span style="color:var(--gold)">${choreC >= 0 ? '+' : ''}${choreC}</span></div>
+    <div class="popup-row"><span>⏳ 前置身份</span><span style="color:var(--gold)">${preIdC >= 0 ? '+' : ''}${preIdC}</span></div>
+    <button class="popup-close" onclick="closePopup()">关闭</button>
+  `);
+}
+
+// ===== 1.1 沉眠符咒渲染 =====
+function renderSleepRune() {
+  const d = getDayData(currentDate);
+  const prevDate = getPrevDateStr(currentDate);
+  const prevD = getDayData(prevDate);
+  const prevId = Number(prevD.sleepIdentity) || 0;
+
+  // 身份
+  $('sleepIdentity').value = d.sleepIdentity || '';
+  $('sleepIdentityName').textContent = d.sleepIdentity ? (IDENTITY_NAMES[Number(d.sleepIdentity)] || '') : '';
+
+  // 技能表
+  let rows = '';
+  const currentId = Number(d.sleepIdentity) || 0;
+
+  SLEEP_SKILLS.forEach((sk, i) => {
+    // 技能显示条件判断
+    if (sk.name === '欺瞒' && currentId !== 1) return; // 仅守夜人
+    if (sk.name === '延时响应' && (currentId === 1 || currentId === 10 || currentId === 0)) return; // 非守夜人和不眠者
+    if (sk.name === '句号' && ![2, 3, 4, 8, 9].includes(prevId)) return; // 前一天身份为2,3,4,8,9
+    if (sk.name === '芭丝特的祝福' && currentId !== 6) return; // 仅驯兽师
+
+    const roll = d.sleepSkills ? d.sleepSkills[sk.name] : undefined;
+    const j = judgeSkill(roll, sk.threshold);
+
+    let nameCell = sk.name;
+
+    rows += `<tr>
+      <td data-label="技能名称">${nameCell}</td>
+      <td data-label="技能数值">${sk.threshold}</td>
+      <td data-label="投掷值"><input type="number" min="1" max="100" value="${roll !== undefined ? roll : ''}" onchange="onSleepSkillChange('${sk.name}', this.value)"></td>
+      <td data-label="判定结果"><span class="result-badge ${j.cls}">${j.label}</span></td>
+      <td data-label="说明"><button class="info-btn" onclick="showSkillInfo('${sk.name}')">说明</button></td>
+    </tr>`;
+
+    // 额外行渲染
+    rows += renderSkillExtraRow(sk.name, j.result, d, sk.threshold);
+
+    // 句号技能的固定提示行（仅当已投掷/使用该技能时显示）
+    if (sk.name === '句号' && roll != null && roll !== '') {
+      rows += `<tr class="skill-extra-row"><td colspan="5">不能在自选身份的次日使用<br>不能连续两日使用</td></tr>`;
+    }
+  });
+  $('sleepSkillTable').innerHTML = rows;
+
+  // 成功radio
+  const yesRadio = qs('#sleepSuccessGroup input[value="yes"]');
+  const noRadio = qs('#sleepSuccessGroup input[value="no"]');
+  if (d.sleepSuccess === 'yes') yesRadio.checked = true;
+  else if (d.sleepSuccess === 'no') noRadio.checked = true;
+  else { yesRadio.checked = false; noRadio.checked = false; }
+
+  // 金币显示
+  const skillCoin = d.sleepSkillCoin || 0;
+  const totalCoin = (d.sleepCoin || 0) + skillCoin;
+  const coinText = d.sleepCoin !== null
+    ? `获得金币: ${totalCoin >= 0 ? '+' : ''}${fmtCoin(totalCoin)}`
+    : '';
+  $('sleepCoinDisplay').textContent = coinText;
+}
+
+// 渲染技能额外行
+function renderSkillExtraRow(name, result, d, threshold) {
+  if (!result || result === 'pending') return '';
+  const extras = d.sleepSkillExtras || {};
+
+  switch (name) {
+    case '欺瞒': {
+      if (result === 'crit') {
+        return `<tr class="skill-extra-row"><td colspan="5" style="color:var(--gold);">获得30min欺瞒时间</td></tr>`;
+      } else if (result === 'extreme' || result === 'hard' || result === 'normal') {
+        const d6 = extras['欺瞒_d6'] || '';
+        const minutes = Number(d6) * 5 || 0;
+        return `<tr class="skill-extra-row"><td colspan="5">
+          <input type="number" min="1" max="6" value="${d6}" placeholder="1d6" onchange="onSleepSkillExtraChange('欺瞒','d6',this.value)" style="width:50px;padding:3px 5px;font-size:0.75rem;">
+          <span>获得(${minutes})min的欺瞒时间</span>
+        </td></tr>`;
+      } else if (result === 'fumble') {
+        return `<tr class="skill-extra-row"><td colspan="5" style="color:var(--red);">需提前30min执行</td></tr>`;
+      }
+      break;
+    }
+    case '延时响应': {
+      if (result === 'crit') {
+        return `<tr class="skill-extra-row"><td colspan="5" style="color:var(--gold);">获得36min延时响应时间</td></tr>`;
+      } else if (result === 'normal') {
+        const d6 = extras['延时响应_2d6'] || '';
+        const minutes = Number(d6) || 0;
+        return `<tr class="skill-extra-row"><td colspan="5">
+          <input type="number" min="2" max="12" value="${d6}" placeholder="2d6" onchange="onSleepSkillExtraChange('延时响应','2d6',this.value)" style="width:50px;padding:3px 5px;font-size:0.75rem;">
+          <span>获得(${minutes})min的延时响应时间</span>
+        </td></tr>`;
+      } else if (result === 'hard') {
+        const d6 = extras['延时响应_2d6'] || '';
+        const minutes = (Number(d6) || 0) * 2;
+        return `<tr class="skill-extra-row"><td colspan="5">
+          <input type="number" min="2" max="12" value="${d6}" placeholder="2d6" onchange="onSleepSkillExtraChange('延时响应','2d6',this.value)" style="width:50px;padding:3px 5px;font-size:0.75rem;">
+          <span>获得(${minutes})min的延时响应时间</span>
+        </td></tr>`;
+      } else if (result === 'extreme') {
+        const d6 = extras['延时响应_2d6'] || '';
+        const minutes = (Number(d6) || 0) * 3;
+        return `<tr class="skill-extra-row"><td colspan="5">
+          <input type="number" min="2" max="12" value="${d6}" placeholder="2d6" onchange="onSleepSkillExtraChange('延时响应','2d6',this.value)" style="width:50px;padding:3px 5px;font-size:0.75rem;">
+          <span>获得(${minutes})min的延时响应时间</span>
+        </td></tr>`;
+      } else if (result === 'fumble') {
+        const d6 = extras['延时响应_2d6'] || '';
+        const minutes = Number(d6) || 0;
+        return `<tr class="skill-extra-row"><td colspan="5">
+          <input type="number" min="2" max="12" value="${d6}" placeholder="2d6" onchange="onSleepSkillExtraChange('延时响应','2d6',this.value)" style="width:50px;padding:3px 5px;font-size:0.75rem;">
+          <span style="color:var(--red);">需提前(${minutes})min开始</span>
+        </td></tr>`;
+      }
+      break;
+    }
+    case '句号': {
+      if (result === 'normal' || result === 'hard' || result === 'extreme') {
+        return `<tr class="skill-extra-row"><td colspan="5" style="color:var(--green);">今日可继续该身份</td></tr>`;
+      } else if (result === 'crit') {
+        return `<tr class="skill-extra-row"><td colspan="5" style="color:var(--gold);">今日及明日可继续该身份</td></tr>`;
+      } else if (result === 'fumble') {
+        return `<tr class="skill-extra-row"><td colspan="5" style="color:var(--red);">今日及明日都不可继续该身份</td></tr>`;
+      }
+      break;
+    }
+    case '芭丝特的祝福': {
+      if (result === 'crit') {
+        return `<tr class="skill-extra-row"><td colspan="5" style="color:var(--gold);">小猫咪不介意你边陪玩边做任何事情<br>并额外送你一枚金币</td></tr>`;
+      } else if (result === 'normal') {
+        const d3 = extras['芭丝特的祝福_d3'] || '';
+        const coin = ((Number(d3) || 0) * 0.1).toFixed(1);
+        return `<tr class="skill-extra-row"><td colspan="5">
+          <input type="number" min="1" max="3" value="${d3}" placeholder="1d3" onchange="onSleepSkillExtraChange('芭丝特的祝福','d3',this.value)" style="width:50px;padding:3px 5px;font-size:0.75rem;">
+          <span>小猫咪不介意你占用身份时间给她梳毛刷牙，也不介意你看视频，并额外送你(${coin})枚金币</span>
+        </td></tr>`;
+      } else if (result === 'hard') {
+        const d3 = extras['芭丝特的祝福_d3'] || '';
+        const coin = ((Number(d3) || 0) * 0.2).toFixed(1);
+        return `<tr class="skill-extra-row"><td colspan="5">
+          <input type="number" min="1" max="3" value="${d3}" placeholder="1d3" onchange="onSleepSkillExtraChange('芭丝特的祝福','d3',this.value)" style="width:50px;padding:3px 5px;font-size:0.75rem;">
+          <span>小猫咪不介意你占用身份时间给她梳毛刷牙，也不介意你看视频，并额外送你(${coin})枚金币</span>
+        </td></tr>`;
+      } else if (result === 'extreme') {
+        const d3 = extras['芭丝特的祝福_d3'] || '';
+        const coin = ((Number(d3) || 0) * 0.3).toFixed(1);
+        return `<tr class="skill-extra-row"><td colspan="5">
+          <input type="number" min="1" max="3" value="${d3}" placeholder="1d3" onchange="onSleepSkillExtraChange('芭丝特的祝福','d3',this.value)" style="width:50px;padding:3px 5px;font-size:0.75rem;">
+          <span>小猫咪不介意你占用身份时间给她梳毛刷牙，也不介意你看视频，并额外送你(${coin})枚金币</span>
+        </td></tr>`;
+      } else if (result === 'fumble') {
+        return `<tr class="skill-extra-row"><td colspan="5" style="color:var(--red);">小猫咪生气了并抠走你0.5枚金币</td></tr>`;
+      }
+      break;
+    }
+    case '时-光-倒-流': {
+      if (result === 'normal') {
+        return `<tr class="skill-extra-row"><td colspan="5" style="color:var(--blue);">今日可重骰一次身份</td></tr>`;
+      } else if (result === 'hard' || result === 'extreme') {
+        return `<tr class="skill-extra-row"><td colspan="5" style="color:var(--green);">今日可重骰一次身份，并可从两个世界线中选择一条<br><span style="font-size:0.7rem;color:var(--text-muted);">每两天最多使用一次</span></td></tr>`;
+      } else if (result === 'crit') {
+        return `<tr class="skill-extra-row"><td colspan="5" style="color:var(--gold);">今日可重骰两次身份，并可从三个世界线中选择一条</td></tr>`;
+      } else if (result === 'fumble') {
+        return `<tr class="skill-extra-row"><td colspan="5" style="color:var(--red);">封印一周技能</td></tr>`;
+      }
+      break;
+    }
+    case '握烬成光': {
+      // 此技能判定为"成功"时（大成功/普通/困难/极难都视为成功）
+      if (result === 'crit' || result === 'extreme' || result === 'hard' || result === 'normal') {
+        const achieved = extras['握烬成光_achieved'] === true;
+        return `<tr class="skill-extra-row"><td colspan="5" style="color:var(--green);">如能在01:00前闭眼，则不仅可以不扣分，还能追溯0.2分</td></tr>
+        <tr class="skill-extra-row"><td colspan="5">
+          <input type="checkbox" id="wjjcgAchieved" onchange="onSleepSkillExtraChange('握烬成光','achieved',this.checked)" ${achieved ? 'checked' : ''} style="accent-color:var(--accent);">
+          <label for="wjjcgAchieved" style="font-size:0.75rem;color:var(--text-dim);cursor:pointer;">是否实现</label>
+        </td></tr>`;
+      }
+      // 失败/大失败不显示
+      break;
+    }
+  }
+  return '';
+}
+
+function onSleepIdentityChange() {
+  const val = $('sleepIdentity').value;
+  const d = getDayData(currentDate);
+  d.sleepIdentity = val;
+  $('sleepIdentityName').textContent = val ? (IDENTITY_NAMES[Number(val)] || '') : '';
+  recalcSleepCoin();
+  saveStore();
+  renderStatsBar();
+  renderSleepBank();
+  renderTenacity();
+  renderSleepRune();
+  renderIdentityReview('sleep');
+}
+
+function onSleepSkillChange(name, value) {
+  const d = getDayData(currentDate);
+  if (!d.sleepSkills) d.sleepSkills = {};
+  d.sleepSkills[name] = value === '' ? undefined : Number(value);
+  recalcSleepCoin();
+  saveStore();
+  renderSleepRune();
+  renderStatsBar();
+}
+
+function onSleepSuccessChange() {
+  const yesRadio = qs('#sleepSuccessGroup input[value="yes"]');
+  const d = getDayData(currentDate);
+  d.sleepSuccess = yesRadio.checked ? 'yes' : 'no';
+  recalcSleepCoin();
+  saveStore();
+  renderStatsBar();
+  renderSleepRune();
+  renderIdentityReview('sleep');
+}
+
+function recalcSleepCoin() {
+  const d = getDayData(currentDate);
+  if (d.sleepSuccess === null) {
+    d.sleepCoin = null;
+    d.sleepSkillCoin = 0;
+    return;
+  }
+  d.sleepCoin = d.sleepSuccess === 'yes' ? 1 : -1;
+  // 不眠者身份(10)：当日沉眠符咒金币特殊计算 —— 成功仍+1，失败也不扣(0)。
+  // 仅影响当日沉眠符咒金币，与睡眠积分无关，也不影响次日。
+  if (Number(d.sleepIdentity) === 10 && d.sleepSuccess === 'no') {
+    d.sleepCoin = 0;
+  }
+
+  // 计算技能金币
+  let skillCoin = 0;
+  const extras = d.sleepSkillExtras || {};
+
+  // 芭丝特的祝福
+  const catSkill = d.sleepSkills ? d.sleepSkills['芭丝特的祝福'] : undefined;
+  if (catSkill !== undefined && catSkill !== null && catSkill !== '') {
+    const j = judgeSkill(catSkill, 65);
+    if (j.result === 'crit') {
+      skillCoin += 1;
+    } else if (j.result === 'normal') {
+      const d3 = Number(extras['芭丝特的祝福_d3']) || 0;
+      skillCoin += d3 * 0.1;
+    } else if (j.result === 'hard') {
+      const d3 = Number(extras['芭丝特的祝福_d3']) || 0;
+      skillCoin += d3 * 0.2;
+    } else if (j.result === 'extreme') {
+      const d3 = Number(extras['芭丝特的祝福_d3']) || 0;
+      skillCoin += d3 * 0.3;
+    } else if (j.result === 'fumble') {
+      skillCoin -= 0.5;
+    }
+  }
+
+  // 握烬成光：仅当身份执行失败时，发动此技能可抵消-1分并追溯0.2分（净+0.2，存储为+1.2）
+  const wjjcgSkill = d.sleepSkills ? d.sleepSkills['握烬成光'] : undefined;
+  if (d.sleepSuccess === 'no' && wjjcgSkill !== undefined && wjjcgSkill !== null && wjjcgSkill !== '') {
+    const j = judgeSkill(wjjcgSkill, 40);
+    if (j.result === 'crit' || j.result === 'extreme' || j.result === 'hard' || j.result === 'normal') {
+      if (extras['握烬成光_achieved'] === true) {
+        skillCoin += 1.2;
+      }
+    }
+  }
+
+  d.sleepSkillCoin = skillCoin;
+}
+
+function onSleepSkillExtraChange(skillName, fieldName, value) {
+  const d = getDayData(currentDate);
+  if (!d.sleepSkillExtras) d.sleepSkillExtras = {};
+  if (fieldName === 'achieved') {
+    d.sleepSkillExtras[`${skillName}_achieved`] = value;
+  } else {
+    d.sleepSkillExtras[`${skillName}_${fieldName}`] = value === '' ? undefined : value;
+  }
+  recalcSleepCoin();
+  saveStore();
+  renderSleepRune();
+  renderStatsBar();
+}
+
+// ===== 1.2 琐事固定术渲染 =====
+function renderChores() {
+  const d = getDayData(currentDate);
+  const todayDow = getDayOfWeek(parseDate(currentDate));
+  let html = '';
+
+  // 获取本周一
+  const monday = parseDate(getMonday(parseDate(currentDate)));
+  // 上周五
+  const lastFriday = new Date(monday);
+  lastFriday.setDate(lastFriday.getDate() - 3);
+
+  for (let dow = 1; dow <= 7; dow++) {
+    const dayDate = new Date(monday);
+    dayDate.setDate(dayDate.getDate() + dow - 1);
+    const dayStr = fmtDate(dayDate);
+    const dayData = getDayData(dayStr);
+    const chores = CHORE_DEFS[dow % 7] || [];
+
+    if (dow === 4) {
+      // 周四: 无打卡项，自动完成逻辑（仅界面显示变化，规则不变）
+      const thuComplete = checkThursdayAuto(currentDate);
+      const doneIcon = thuComplete ? '<span class="day-done-icon">✅</span>' : '';
+      const tagCls = 'chore-tag thu-tag' + (thuComplete ? ' selected' : '');
+      const tagText = thuComplete ? '已完成本轮循环' : '未完成本轮循环';
+      html += `<div class="chore-row thu-row" style="align-items:center;">
+        ${doneIcon}<span class="day-label">周四</span>
+        <span class="${tagCls}" style="cursor:default;text-align:center;line-height:1.5;">${tagText}</span>
+      </div>`;
+      // 更新数据（与原逻辑一致：仅满足条件时标记并计金币）
+      if (thuComplete) {
+        if (!dayData.chores) dayData.chores = {};
+        dayData.chores._thuAuto = true;
+        updateChoreCoin(dayStr);
+      }
+      continue;
+    }
+
+    if (!dayData.chores) dayData.chores = {};
+
+    let allDone = chores.length > 0;
+    chores.forEach(ch => {
+      const selected = dayData.chores[ch] === true;
+      if (!selected) allDone = false;
+    });
+
+    const doneIcon = allDone ? '<span class="day-done-icon">✅</span>' : '';
+    let rowHtml = `<div class="chore-row">${doneIcon}<span class="day-label">${getDayLabel(dayDate)}</span>`;
+
+    if (allDone && chores.length > 0) {
+      dayData.choreCoin = 1;
+    } else {
+      dayData.choreCoin = chores.length > 0 ? 0 : null;
+    }
+
+    chores.forEach(ch => {
+      const selected = dayData.chores[ch] === true;
+      rowHtml += `<span class="chore-tag${selected ? ' selected' : ''}" onclick="toggleChore('${dayStr}', '${ch}')">${ch}</span>`;
+    });
+
+    rowHtml += `</div>`;
+    html += rowHtml;
+  }
+
+  $('choresContainer').innerHTML = html;
+  saveStore();
+
+  const coinVal = d.choreCoin;
+  $('choreCoinDisplay').textContent = coinVal !== null && coinVal !== undefined ? `获得金币: ${coinVal >= 0 ? '+' : ''}${coinVal}` : '';
+}
+
+function checkThursdayAuto(dateStr) {
+  const monday = parseDate(getMonday(parseDate(dateStr)));
+  // 上周五
+  const lastFriday = new Date(monday);
+  lastFriday.setDate(lastFriday.getDate() - 3);
+  // 本周三
+  const thisWed = new Date(monday);
+  thisWed.setDate(thisWed.getDate() + 2);
+
+  const current = new Date(lastFriday);
+  while (current <= thisWed) {
+    const dayStr = fmtDate(current);
+    const dayData = getDayData(dayStr);
+    const dow = current.getDay();
+    const chores = CHORE_DEFS[dow] || [];
+
+    if (dow === 4) {
+      // 如果是周四，递归检查
+      if (!checkThursdayAuto(dayStr)) return false;
+    } else if (chores.length > 0) {
+      if (!dayData.chores) return false;
+      const allDone = chores.every(ch => dayData.chores[ch] === true);
+      if (!allDone) return false;
+    }
+
+    current.setDate(current.getDate() + 1);
+  }
+  return true;
+}
+
+function toggleChore(dateStr, choreName) {
+  const d = getDayData(dateStr);
+  if (!d.chores) d.chores = {};
+  d.chores[choreName] = !d.chores[choreName];
+  updateChoreCoin(dateStr);
+  saveStore();
+  renderChores();
+  renderStatsBar();
+}
+
+function updateChoreCoin(dateStr) {
+  const d = getDayData(dateStr);
+  const dow = getDayOfWeek(parseDate(dateStr));
+  if (dow === 4) {
+    // 周四由 checkThursdayAuto 处理
+    const complete = checkThursdayAuto(dateStr);
+    d.choreCoin = complete ? 1 : 0;
+    return;
+  }
+  const chores = CHORE_DEFS[dow] || [];
+  if (chores.length === 0) { d.choreCoin = null; return; }
+  if (!d.chores) d.chores = {};
+  const allDone = chores.every(ch => d.chores[ch] === true);
+  d.choreCoin = allDone ? 1 : 0;
+}
+
+// ===== 1.3 前置身份渲染 =====
+function renderPreId() {
+  const d = getDayData(currentDate);
+
+  $('preIdIdentity').value = d.preIdIdentity || '';
+  const taskId = Number(d.preIdIdentity);
+  $('preIdTaskName').textContent = taskId ? (PRE_ID_TASKS[taskId] || '') : '';
+
+  // 自定义任务
+  if (taskId === 10) {
+    $('preIdCustomRow').style.display = 'flex';
+    $('preIdCustomInput').value = store._preIdCustomValue || '';
+  } else {
+    $('preIdCustomRow').style.display = 'none';
+  }
+
+  // 技能表
+  let rows = '';
+  PRE_ID_SKILLS.forEach((sk, i) => {
+    const roll = d.preIdSkills ? d.preIdSkills[sk.name] : undefined;
+    const j = judgeSkill(roll, sk.threshold);
+    rows += `<tr>
+      <td data-label="技能名称">${sk.name}</td>
+      <td data-label="技能数值">${sk.threshold}</td>
+      <td data-label="投掷值"><input type="number" min="1" max="100" value="${roll !== undefined ? roll : ''}" onchange="onPreIdSkillChange('${sk.name}', this.value)"></td>
+      <td data-label="判定结果"><span class="result-badge ${j.cls}">${j.label}</span></td>
+      <td data-label="说明"><button class="info-btn" onclick="showSkillInfo('${sk.name}')">说明</button></td>
+    </tr>`;
+
+    // 额外行渲染
+    rows += renderPreIdSkillExtraRow(sk.name, j.result, d, sk.threshold);
+  });
+  $('preIdSkillTable').innerHTML = rows;
+
+  // 成功radio
+  const yesRadio = qs('#preIdSuccessGroup input[value="yes"]');
+  const noRadio = qs('#preIdSuccessGroup input[value="no"]');
+  if (d.preIdSuccess === 'yes') yesRadio.checked = true;
+  else if (d.preIdSuccess === 'no') noRadio.checked = true;
+  else { yesRadio.checked = false; noRadio.checked = false; }
+
+  // 金币显示
+  $('preIdCoinDisplay').textContent = d.preIdCoin !== null ? `获得金币: ${d.preIdCoin >= 0 ? '+' : ''}${d.preIdCoin}` : '';
+}
+
+// ===== 1.4 兑换树 渲染与逻辑 =====
+let exchangeEditor = null; // null | {mode:'new'|'edit', id, name, kind, cost, per, tiers:[]}
+
+function renderExchangeTree() {
+  const items = store._exchangeItems || [];
+  const d = getDayData(currentDate);
+  if (!d.exchangeTree) d.exchangeTree = [];
+
+  // 编辑态：渲染编辑器
+  if (exchangeEditor) {
+    $('exchangeTreeBody').innerHTML = renderExchangeEditorHtml();
+    return;
+  }
+
+  let html = `<div style="font-size:0.78rem;color:var(--text-muted);margin-bottom:6px;">兑换物品消耗金币（计入金币堆，不计入今日获得金币）</div>`;
+
+  items.forEach(it => {
+    const needsAmt = it.kind !== 'flat';
+    html += `<div class="ex-item">
+      <div class="ex-item-head">
+        <span class="ex-name">${it.name}</span>
+        <span class="ex-desc">${describeItem(it)}</span>
+      </div>
+      <div class="ex-item-actions">
+        ${needsAmt ? `<input type="number" id="exAmt_${it.id}" min="0" placeholder="金额(元)" style="width:78px;font-size:0.8rem;">` : ''}
+        <button class="ex-btn" onclick="doExchange('${it.id}')">兑换</button>
+        <button class="ex-btn ghost" onclick="openExchangeEditor('${it.id}')">编辑</button>
+        <button class="ex-btn ghost" onclick="deleteExchangeItem('${it.id}')">删除</button>
+      </div>
+    </div>`;
+  });
+
+  // 今日兑换记录
+  if (d.exchangeTree.length) {
+    html += `<div style="margin-top:10px;font-weight:600;font-size:0.8rem;color:var(--text-dim);">${currentDate === todayStr() ? '今日' : '该日'}兑换记录</div>`;
+    d.exchangeTree.forEach(r => {
+      const amtTxt = (r.amount != null && r.amount !== '') ? `（${r.amount}元）` : '';
+      html += `<div class="ex-record">
+        <span>${r.name}${amtTxt}</span>
+        <span style="color:var(--red);">-${fmtCoin(r.cost)}</span>
+        <button class="ex-btn ghost" onclick="deleteExchangeRecord('${r.rid}')">×</button>
+      </div>`;
+    });
+  }
+
+  html += `<button class="ex-btn add" style="margin-top:10px;" onclick="openExchangeEditor(null)">+ 添加物品</button>`;
+
+  $('exchangeTreeBody').innerHTML = html;
+}
+
+function renderExchangeEditorHtml() {
+  const e = exchangeEditor;
+  let tierHtml = '';
+  if (e.kind === 'tiered') {
+    e.tiers.forEach((t, idx) => {
+      const upVal = (t.upTo === Infinity || t.upTo >= 1e9) ? '' : t.upTo;
+      tierHtml += `<div class="ex-tier-row">
+        ≤<input type="number" value="${upVal}" placeholder="上限元" onchange="exchangeEditor.tiers[${idx}].upTo=(this.value===''?Infinity:Number(this.value))" style="width:64px;">元
+        消耗<input type="number" value="${t.cost}" onchange="exchangeEditor.tiers[${idx}].cost=Number(this.value)" style="width:54px;">分
+        <button class="ex-btn ghost" onclick="exEditorRemoveTier(${idx})">删</button>
+      </div>`;
+    });
+  }
+  return `<div class="ex-editor">
+    <div style="font-weight:600;margin-bottom:8px;">${e.mode === 'edit' ? '编辑物品' : '添加物品'}</div>
+    <div class="form-row"><label>名称</label><input type="text" id="exEdName" value="${e.name}" oninput="exchangeEditor.name=this.value" style="flex:1;min-width:0;"></div>
+    <div class="form-row"><label>计价方式</label>
+      <select id="exEdKind" onchange="exchangeEditor.kind=this.value; renderExchangeTree();">
+        <option value="flat" ${e.kind === 'flat' ? 'selected' : ''}>固定分</option>
+        <option value="per100" ${e.kind === 'per100' ? 'selected' : ''}>每100元消耗</option>
+        <option value="tiered" ${e.kind === 'tiered' ? 'selected' : ''}>按金额分档</option>
+      </select>
+    </div>
+    ${e.kind === 'flat' ? `<div class="form-row"><label>消耗(分)</label><input type="number" id="exEdCost" value="${e.cost}" oninput="exchangeEditor.cost=Number(this.value)" style="width:84px;"></div>` : ''}
+    ${e.kind === 'per100' ? `<div class="form-row"><label>每100元消耗(分)</label><input type="number" id="exEdPer" value="${e.per}" oninput="exchangeEditor.per=Number(this.value)" style="width:84px;"></div>` : ''}
+    ${e.kind === 'tiered' ? `<div class="ex-tiers"><div style="font-size:0.76rem;color:var(--text-muted);margin-bottom:4px;">档位（上限留空=无上限）：</div>${tierHtml}<button class="ex-btn ghost" onclick="exEditorAddTier()">+ 添加档位</button></div>` : ''}
+    <div class="form-row" style="margin-top:10px;gap:8px;">
+      <button class="ex-btn" onclick="saveExchangeEditor()">保存</button>
+      <button class="ex-btn ghost" onclick="closeExchangeEditor()">取消</button>
+    </div>
+  </div>`;
+}
+
+function doExchange(itemId) {
+  const items = store._exchangeItems || [];
+  const item = items.find(x => x.id === itemId);
+  if (!item) return;
+  let amount = null, cost = 0;
+  if (item.kind !== 'flat') {
+    const inp = document.getElementById('exAmt_' + itemId);
+    amount = inp ? Number(inp.value) : 0;
+    if (!amount || amount <= 0) { showToast('请输入金额'); return; }
+  }
+  cost = computeExchangeCost(item, amount);
+  const d = getDayData(currentDate);
+  if (!d.exchangeTree) d.exchangeTree = [];
+  d.exchangeTree.push({
+    rid: 'r' + Date.now() + Math.random().toString(36).slice(2, 6),
+    itemId: itemId, name: item.name, amount: amount, cost: cost, ts: Date.now()
+  });
+  saveStore();
+  renderExchangeTree();
+  renderStatsBar();
+  showToast(`已兑换 ${item.name}：-${fmtCoin(cost)} 金币`);
+}
+
+function deleteExchangeRecord(rid) {
+  const d = getDayData(currentDate);
+  if (!d.exchangeTree) return;
+  d.exchangeTree = d.exchangeTree.filter(r => r.rid !== rid);
+  saveStore();
+  renderExchangeTree();
+  renderStatsBar();
+}
+
+function openExchangeEditor(itemId) {
+  const items = store._exchangeItems || [];
+  if (itemId) {
+    const it = items.find(x => x.id === itemId);
+    if (!it) return;
+    exchangeEditor = {
+      mode: 'edit', id: itemId,
+      name: it.name, kind: it.kind,
+      cost: it.cost || 0, per: it.per || 0,
+      tiers: (it.tiers || []).map(t => ({ upTo: t.upTo, cost: t.cost }))
+    };
+  } else {
+    exchangeEditor = {
+      mode: 'new', id: null,
+      name: '', kind: 'flat',
+      cost: 5, per: 10,
+      tiers: [ { upTo: 100, cost: 10 }, { upTo: Infinity, cost: 20 } ]
+    };
+  }
+  renderExchangeTree();
+}
+
+function closeExchangeEditor() { exchangeEditor = null; renderExchangeTree(); }
+
+function exEditorAddTier() { exchangeEditor.tiers.push({ upTo: 100, cost: 10 }); renderExchangeTree(); }
+function exEditorRemoveTier(idx) { exchangeEditor.tiers.splice(idx, 1); renderExchangeTree(); }
+
+function saveExchangeEditor() {
+  const name = document.getElementById('exEdName').value.trim();
+  if (!name) { showToast('请输入名称'); return; }
+  const kind = document.getElementById('exEdKind').value;
+  const item = { id: exchangeEditor.id || ('ex' + Date.now()), name: name, kind: kind, cost: 0, per: 0, tiers: [] };
+  if (kind === 'flat') {
+    item.cost = Number(document.getElementById('exEdCost').value) || 0;
+  } else if (kind === 'per100') {
+    item.per = Number(document.getElementById('exEdPer').value) || 0;
+  } else if (kind === 'tiered') {
+    item.tiers = exchangeEditor.tiers.map(t => ({ upTo: (t.upTo >= 1e9 ? Infinity : Number(t.upTo)), cost: Number(t.cost) || 0 }));
+    if (!item.tiers.length) { showToast('请至少添加一个档位'); return; }
+  }
+  let items = store._exchangeItems || [];
+  if (exchangeEditor.mode === 'edit') {
+    const idx = items.findIndex(x => x.id === exchangeEditor.id);
+    if (idx >= 0) items[idx] = item; else items.push(item);
+  } else {
+    items.push(item);
+  }
+  store._exchangeItems = items;
+  saveStore();
+  exchangeEditor = null;
+  renderExchangeTree();
+  showToast('已保存');
+}
+
+function deleteExchangeItem(itemId) {
+  let items = store._exchangeItems || [];
+  items = items.filter(x => x.id !== itemId);
+  store._exchangeItems = items;
+  saveStore();
+  renderExchangeTree();
+  renderStatsBar();
+  showToast('已删除物品');
+}
+
+// 渲染前置身份技能额外行（规则与沉眠符咒的时-光-倒-流相同，但数据独立）
+function renderPreIdSkillExtraRow(name, result, d, threshold) {
+  if (!result || result === 'pending') return '';
+
+  switch (name) {
+    case '时-光-倒-流v2': {
+      if (result === 'normal') {
+        return `<tr class="skill-extra-row"><td colspan="5">今日可重骰一次身份</td></tr>`;
+      } else if (result === 'hard' || result === 'extreme') {
+        return `<tr class="skill-extra-row"><td colspan="5">今日可重骰一次身份，并可从两个世界线中选择一条<br><span style="font-size:0.7rem;color:var(--text-muted);">每两天最多使用一次</span></td></tr>`;
+      } else if (result === 'crit') {
+        return `<tr class="skill-extra-row"><td colspan="5">今日可重骰两次身份，并可从三个世界线中选择一条</td></tr>`;
+      } else if (result === 'fumble') {
+        return `<tr class="skill-extra-row"><td colspan="5">封印一周技能</td></tr>`;
+      }
+      break;
+    }
+  }
+  return '';
+}
+
+function onPreIdIdentityChange() {
+  const val = $('preIdIdentity').value;
+  const d = getDayData(currentDate);
+  d.preIdIdentity = val;
+  $('preIdTaskName').textContent = val ? (PRE_ID_TASKS[Number(val)] || '') : '';
+  recalcPreIdCoin();
+  saveStore();
+  renderPreId();
+  renderStatsBar();
+  renderIdentityReview('pre');
+}
+
+function onPreIdCustomChange() {
+  store._preIdCustomValue = $('preIdCustomInput').value;
+  saveStore();
+  renderPreId();
+}
+
+function onPreIdSkillChange(name, value) {
+  const d = getDayData(currentDate);
+  if (!d.preIdSkills) d.preIdSkills = {};
+  d.preIdSkills[name] = value === '' ? undefined : Number(value);
+  recalcPreIdCoin();
+  saveStore();
+  renderPreId();
+}
+
+function onPreIdSuccessChange() {
+  const yesRadio = qs('#preIdSuccessGroup input[value="yes"]');
+  const d = getDayData(currentDate);
+  d.preIdSuccess = yesRadio.checked ? 'yes' : 'no';
+  recalcPreIdCoin();
+  saveStore();
+  renderStatsBar();
+  renderPreId();
+  renderIdentityReview('pre');
+}
+
+function recalcPreIdCoin() {
+  const d = getDayData(currentDate);
+  if (d.preIdSuccess === null) {
+    d.preIdCoin = null;
+    return;
+  }
+  d.preIdCoin = d.preIdSuccess === 'yes' ? 2 : 0;
+}
+
+// ===== 2.1 睡眠银行渲染 =====
+function renderSleepBank() {
+  const d = getDayData(currentDate);
+
+  // 顶部统计（使用共用函数，两行布局）
+  renderSleepBankStatsOnly();
+
+
+  // 时间选择器
+  const prepH = d.sleepPrepareTime ? parseInt(d.sleepPrepareTime.split(':')[0]) : -1;
+  const prepM = d.sleepPrepareTime ? parseInt(d.sleepPrepareTime.split(':')[1]) : -1;
+  const fallH = d.sleepFallAsleepTime ? parseInt(d.sleepFallAsleepTime.split(':')[0]) : -1;
+  const fallM = d.sleepFallAsleepTime ? parseInt(d.sleepFallAsleepTime.split(':')[1]) : -1;
+
+  $('sleepTimeInputs').innerHTML = `
+    <div class="time-selector-group">
+      <label>准备睡觉:</label>
+      <select id="sleepPrepareH" onchange="onSleepTimeSelectChange('sleepPrepareTime')">${generateHourOptions(prepH, true)}</select>
+      <span class="time-unit">时</span>
+      <select id="sleepPrepareM" onchange="onSleepTimeSelectChange('sleepPrepareTime')">${generateMinuteOptions(prepM, true)}</select>
+      <span class="time-unit">分</span>
+    </div>
+    <div class="time-selector-group">
+      <label>入睡时间:</label>
+      <select id="sleepFallAsleepH" onchange="onSleepTimeSelectChange('sleepFallAsleepTime')">${generateHourOptions(fallH, true)}</select>
+      <span class="time-unit">时</span>
+      <select id="sleepFallAsleepM" onchange="onSleepTimeSelectChange('sleepFallAsleepTime')">${generateMinuteOptions(fallM, true)}</select>
+      <span class="time-unit">分</span>
+    </div>
+    <div class="time-selector-group">
+      <label>睡眠时长:</label>
+      <select id="sleepDurationH" onchange="onSleepDurationChange()">${generateHourOptions(d.sleepDuration ? Math.floor(Number(d.sleepDuration) / 60) : -1)}</select>
+      <span class="time-unit">时</span>
+      <select id="sleepDurationM" onchange="onSleepDurationChange()">${generateMinuteOptions(d.sleepDuration ? Number(d.sleepDuration) % 60 : -1)}</select>
+      <span class="time-unit">分</span>
+    </div>
+  `;
+
+  // 打卡
+  $('sleepLightOff').checked = d.sleepLightOff || false;
+  $('sleepCatGroom').checked = d.sleepCatGroom || false;
+}
+
+function generateHourOptions(selected, includeEmpty) {
+  let html = '<option value="">选择</option>';
+  for (let i = 0; i <= 23; i++) {
+    html += `<option value="${i}"${selected === i ? ' selected' : ''}>${String(i).padStart(2,'0')}</option>`;
+  }
+  return html;
+}
+
+function generateMinuteOptions(selected, includeEmpty) {
+  let html = '<option value="">选择</option>';
+  for (let i = 0; i < 60; i++) {
+    html += `<option value="${i}"${selected === i ? ' selected' : ''}>${String(i).padStart(2,'0')}</option>`;
+  }
+  return html;
+}
+
+function onSleepTimeSelectChange(field) {
+  const hKey = field === 'sleepPrepareTime' ? 'sleepPrepareH' : 'sleepFallAsleepH';
+  const mKey = field === 'sleepPrepareTime' ? 'sleepPrepareM' : 'sleepFallAsleepM';
+  const h = $(hKey).value;
+  const m = $(mKey).value;
+  const d = getDayData(currentDate);
+  if (h === '' || m === '') {
+    d[field] = '';
+  } else {
+    d[field] = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+  }
+  saveStore();
+  // 只更新统计，不重建时间选择器
+  renderStatsBar();
+  renderSleepBankStatsOnly();
+  renderTenacity();
+}
+
+function onSleepDurationChange() {
+  const h = $('sleepDurationH').value;
+  const m = $('sleepDurationM').value;
+  const d = getDayData(currentDate);
+  if (h === '' || m === '') {
+    d.sleepDuration = '';
+  } else {
+    d.sleepDuration = Number(h) * 60 + Number(m);
+  }
+  saveStore();
+  // 只更新统计，不重建时间选择器
+  renderStatsBar();
+  renderSleepBankStatsOnly();
+  renderTenacity();
+}
+
+function onSleepCheckChange() {
+  const d = getDayData(currentDate);
+  d.sleepLightOff = $('sleepLightOff').checked;
+  d.sleepCatGroom = $('sleepCatGroom').checked;
+  saveStore();
+  // 只更新统计，不重建
+  renderStatsBar();
+  renderSleepBankStatsOnly();
+  renderTenacity();
+}
+
+// 只更新睡眠银行顶部统计（不重建时间选择器）
+function renderSleepBankStatsOnly() {
+  const score = calcSleepScore(currentDate);
+  const totalBank = calcSleepYearPoints(currentDate);
+  const monthScore = calcMonthSleepScore(currentDate);
+  const [y, m] = currentDate.split('-').map(Number);
+  const mName = getMonthName(m);
+  const isToday = currentDate === todayStr();
+  const sleepCardLabel = isToday ? '今日获得睡眠积分' : '该日获得睡眠积分';
+
+  $('sleepBankStats').innerHTML = `
+    <div class="sleep-stat-card clickable" onclick="showSleepScoreBreakdown()">
+      <div class="slabel">${sleepCardLabel}</div>
+      <div class="svalue" style="color:${score.total >= 0 ? 'var(--green)' : 'var(--red)'}">${score.total >= 0 ? '+' : ''}${score.total}</div>
+    </div>
+    <div class="sleep-stats-row2">
+      <div class="sleep-stat-card clickable" onclick="showSleepYearSettlement()">
+        <div class="slabel">睡眠银行年积分</div>
+        <div class="svalue">${totalBank}</div>
+      </div>
+      <div class="sleep-stat-card clickable" onclick="showMonthBreakdown()">
+        <div class="slabel">月度积分-${mName}</div>
+        <div class="svalue">${monthScore === null ? '-' : monthScore}</div>
+      </div>
+    </div>
+  `;
+}
+
+function showSleepScoreBreakdown() {
+  const score = calcSleepScore(currentDate);
+  const isToday = currentDate === todayStr();
+  const title = isToday ? '今日睡眠积分分项' : '该日睡眠积分分项';
+  showPopup(`
+    <h3>${title}</h3>
+    <div class="popup-row"><span>准备入睡时间积分</span><span style="color:${score.prepare >= 0 ? 'var(--green)' : 'var(--red)'}">${score.prepare >= 0 ? '+' : ''}${score.prepare}</span></div>
+    <div class="popup-row"><span>睡眠时长积分</span><span style="color:${score.duration >= 0 ? 'var(--green)' : 'var(--red)'}">${score.duration >= 0 ? '+' : ''}${score.duration}</span></div>
+    <div class="popup-row"><span>打卡加分</span><span style="color:var(--green)">+${score.bonus}</span></div>
+    <div class="popup-row" style="font-weight:600;border-top:1px solid var(--border);margin-top:6px;padding-top:6px;">
+      <span>合计</span><span style="color:${score.total >= 0 ? 'var(--green)' : 'var(--red)'}">${score.total >= 0 ? '+' : ''}${score.total}</span>
+    </div>
+    <button class="popup-close" onclick="closePopup()">关闭</button>
+  `);
+}
+
+function showMonthBreakdown() {
+  const year = Number(currentDate.split('-')[0]);
+  let rows = '';
+  for (let mo = 1; mo <= 12; mo++) {
+    const sc = getMonthScore(year, mo);
+    const label = getMonthName(mo) + '月';
+    if (sc === null) {
+      rows += `<div class="popup-row"><span>${label}</span><span style="color:var(--text-muted)">-</span></div>`;
+    } else {
+      const val = (sc >= 0 ? '+' : '') + sc;
+      const color = sc >= 0 ? 'var(--green)' : 'var(--red)';
+      rows += `<div class="popup-row"><span>${label}</span><span style="color:${color}">${val}</span></div>`;
+    }
+  }
+  showPopup(`
+    <h3>${year}年 月度积分（十二个月累计）</h3>
+    ${rows}
+    <button class="popup-close" onclick="closePopup()">关闭</button>
+  `);
+}
+
+// ===== 工作时间银行渲染 =====
+let workOvertimeRulesOpen = false;
+
+function renderWorkBank() {
+  renderWorkBankStatsOnly();
+  renderWorkTimeInputs();
+  renderWorkTenacity();
+}
+
+function renderWorkBankStatsOnly() {
+  const score = calcWorkScore(currentDate);
+  const totalBank = calcWorkYearPoints(currentDate);
+  const isToday = currentDate === todayStr();
+  const workCardLabel = isToday ? '今日工作时间银行积分' : '该日工作时间银行积分';
+  $('workBankStats').innerHTML = `
+    <div class="sleep-stats-row2">
+      <div class="sleep-stat-card clickable" onclick="showWorkScoreBreakdown()">
+        <div class="slabel" style="font-size:0.9rem;">${workCardLabel}</div>
+        <div class="svalue" style="color:${score >= 0 ? 'var(--green)' : 'var(--red)'}">${score >= 0 ? '+' : ''}${score}</div>
+      </div>
+      <div class="sleep-stat-card clickable" onclick="showWorkYearSettlement()">
+        <div class="slabel" style="font-size:0.9rem;">工作时间银行年积分</div>
+        <div class="svalue">${totalBank}</div>
+      </div>
+    </div>
+  `;
+}
+
+function renderWorkTimeInputs() {
+  const d = getDayData(currentDate);
+  const dayType = getDayType(currentDate);
+  const dayLabel = getDayLabel(parseDate(currentDate));
+  const punctual = calcWorkPunctualStreak(currentDate);
+  const focus = calcWorkFocusStreak(currentDate);
+
+  let html = '';
+
+  // 根据日期类型显示不同打卡内容
+  if (dayType === 'workday') {
+    html += `<div class="check-row" style="flex-wrap:wrap;">
+      <span class="streak-badge ${punctual.streak >= 5 ? 'streak-done' : ''}">${punctual.streak}</span>
+      <input type="checkbox" id="workLeaveOnTime" onchange="onWorkPunctualChange()" ${d.workLeaveOnTime ? 'checked' : ''} style="accent-color:var(--accent);width:16px;height:16px;">
+      <label for="workLeaveOnTime" style="font-size:0.82rem;color:var(--text-dim);cursor:pointer;">准时下班打卡 (+15)</label>
+    </div>`;
+    html += `<div class="check-row" style="flex-wrap:wrap;">
+      <span class="streak-badge ${focus.streak >= 5 ? 'streak-done' : ''}">${focus.streak}</span>
+      <input type="checkbox" id="workFocusChecked" onchange="onWorkFocusCheckChange()" ${d.workFocusChecked ? 'checked' : ''} style="accent-color:var(--accent);width:16px;height:16px;">
+      <label for="workFocusChecked" style="font-size:0.82rem;color:var(--text-dim);cursor:pointer;">且专注时间＞200min</label>
+    </div>`;
+  } else {
+    html += `<div style="margin-bottom:10px;font-size:0.82rem;color:var(--text-dim);">${dayLabel} · 周末/节假日质量打卡</div>`;
+    const qualities = [
+      { key: 'low', label: '低质量 (+20)' },
+      { key: 'mid', label: '中质量 (+40)' },
+      { key: 'high', label: '高质量 (+80)' }
+    ];
+    html += `<div class="form-row" style="gap:8px;">`;
+    qualities.forEach(q => {
+      const selected = d.weekendQuality === q.key;
+      html += `<span class="quality-tag${selected ? ' selected' : ''}" onclick="onWeekendQualityChange('${q.key}')">${q.label}</span>`;
+    });
+    html += `</div>`;
+  }
+
+  // 加班时间输入
+  html += `<div class="form-row" style="margin-top:10px;align-items:center;flex-wrap:wrap;">
+    <label style="font-size:0.82rem;color:var(--text-dim);">${currentDate === todayStr() ? '今日' : '该日'}加班时间:</label>
+    <input type="number" id="workOvertime" min="0" placeholder="分钟" value="${d.workOvertime || ''}" onchange="onWorkOvertimeChange()" style="width:70px;">
+    <span class="time-unit">min</span>
+    <button class="info-btn" onclick="toggleOvertimeRules()">计分规则</button>
+  </div>`;
+
+  // 计分规则面板
+  html += `<div class="overtime-rules${workOvertimeRulesOpen ? ' show' : ''}" id="overtimeRules">加班要扣除积分，输入多少分钟就扣除多少积分
+加班时间计算方式：
+办公室加班：
+特殊情况以外，在早9:00以前，晚17:40以后，只要在办公室就视为加班，包括在办公室内的休息、玩手机等，离开办公室的休息、吃饭等不计算时间
+每次从家来到办公室时有10分钟缓冲时间可以不算加班时间
+如果为特殊原因滞留办公室，不能是带着加班任务的状态，且特殊原因解除后需在十分钟内离开办公室，如果无缘由继续在办公室拖时间则视为加班
+在家加班：
+坐在电脑桌开始工作时计算加班时间直到工作完成，只有吃饭和上厕所可以不计算加班时间，加班未完成前的休息也算加班时间，如果工作时间较长建议还是去单位加</div>`;
+
+  $('workTimeInputs').innerHTML = html;
+}
+
+function renderWorkTenacity() {
+  const d = getDayData(currentDate);
+  const tt = calcWorkTenacityToday(currentDate);
+
+  // 先存储今日工作韧性积分，再计算总数
+  d._workTenacityToday = tt.total;
+  const totalWorkTen = calcTotalWorkTenacity();
+
+  const punctual = calcWorkPunctualStreak(currentDate);
+  const focus = calcWorkFocusStreak(currentDate);
+  const weekend = calcWeekendHighQualityStreak(currentDate);
+
+  let html = `
+    <div class="work-tenacity-header">
+      <div class="t-stat">
+        <div class="t-label">工作时间银行<br>韧性积分</div>
+        <div class="t-value">${totalWorkTen}</div>
+      </div>
+      <div class="t-stat clickable" onclick="showWorkTenacityBreakdown()" style="cursor:pointer;">
+        <div class="t-label">${currentDate === todayStr() ? '今日获得' : '该日获得'}<br>韧性积分</div>
+        <div class="t-value">${tt.total >= 0 ? '+' : ''}${tt.total}</div>
+      </div>
+      <div class="t-stat">
+        <div class="t-label">是否使用抵押券</div>
+        <div class="t-value">
+          <input type="checkbox" id="workVoucher" onchange="onWorkVoucherChange()" ${d.workVoucher ? 'checked' : ''} style="accent-color:var(--accent);">
+        </div>
+      </div>
+      <div class="t-stat">
+        <div class="t-label">今日是否出差</div>
+        <div class="t-value">
+          <input type="checkbox" id="workBusinessTrip" onchange="onWorkBusinessTripChange()" ${d.workBusinessTrip ? 'checked' : ''} style="accent-color:var(--accent);">
+        </div>
+      </div>
+    </div>`;
+
+  // 抵押券提示
+  if (d.workVoucher) {
+    html += `<div style="font-size:0.72rem;color:var(--orange);margin:4px 0 8px;padding-left:4px;">使用抵押券（-10工作韧性积分）</div>`;
+  }
+
+  // 连续天数统计
+  html += `<div class="tenacity-checks">
+    <div class="tenacity-check-row">
+      <span class="streak-badge ${punctual.streak >= 5 ? 'streak-done' : ''}">${punctual.streak}</span>
+      <span>连续5天准时下班(+1)</span>
+    </div>
+    <div class="tenacity-check-row">
+      <span class="streak-badge ${focus.streak >= 5 ? 'streak-done' : ''}">${focus.streak}</span>
+      <span>连续5天专注时间＞200min(+3)</span>
+    </div>`;
+  if (getDayType(currentDate) === 'holiday') {
+    html += `<div class="tenacity-check-row">
+      <span class="streak-badge ${weekend.streak >= 2 ? 'streak-done' : ''}">${weekend.streak}</span>
+      <span>周末连续高质量 → 第2天+2，之后每天+1（中断清零）</span>
+    </div>`;
+  }
+  html += `</div>`;
+
+  $('workTenacitySection').innerHTML = html;
+  saveStore();
+}
+
+function showWorkScoreBreakdown() {
+  const score = calcWorkScore(currentDate);
+  const d = getDayData(currentDate);
+  const dayType = getDayType(currentDate);
+  const isToday = currentDate === todayStr();
+  const title = isToday ? '今日工作时间银行积分分项' : '该日工作时间银行积分分项';
+  let baseLabel = '', baseVal = 0;
+  if (dayType === 'workday') {
+    baseLabel = '准时下班打卡';
+    baseVal = d.workLeaveOnTime ? 15 : 0;
+  } else {
+    const qMap = { low: '低质量', mid: '中质量', high: '高质量' };
+    const qVal = { low: 20, mid: 40, high: 80 };
+    baseLabel = '周末质量(' + (qMap[d.weekendQuality] || '未选') + ')';
+    baseVal = d.weekendQuality ? qVal[d.weekendQuality] : 0;
+  }
+  const overtime = Number(d.workOvertime) || 0;
+
+  showPopup(`
+    <h3>${title}</h3>
+    <div class="popup-row"><span>${baseLabel}</span><span style="color:var(--green)">+${baseVal}</span></div>
+    <div class="popup-row"><span>加班扣除</span><span style="color:var(--red)">-${overtime}</span></div>
+    <div class="popup-row" style="font-weight:600;border-top:1px solid var(--border);margin-top:6px;padding-top:6px;">
+      <span>合计</span><span style="color:${score >= 0 ? 'var(--green)' : 'var(--red)'}">${score >= 0 ? '+' : ''}${score}</span>
+    </div>
+    <button class="popup-close" onclick="closePopup()">关闭</button>
+  `);
+}
+
+function showWorkTenacityBreakdown() {
+  const tt = calcWorkTenacityToday(currentDate);
+  const title = currentDate === todayStr() ? '今日工作韧性积分分项' : '该日工作韧性积分分项';
+  let popupHtml = `
+    <h3>${title}</h3>
+    <div class="popup-row"><span>准时下班连续5天</span><span>${tt.punctual ? '+1' : '0'}</span></div>
+    <div class="popup-row"><span>专注＞200min连续5天</span><span>${tt.focus ? '+3' : '0'}</span></div>
+    <div class="popup-row"><span>周末连续高质量</span><span>${tt.weekend ? '+' + tt.weekend : '0'}</span></div>`;
+  if (tt.voucher) {
+    popupHtml += `<div class="popup-row"><span>使用韧性积分</span><span style="color:var(--red)">${tt.voucher}</span></div>`;
+  }
+  popupHtml += `
+    <div class="popup-row" style="font-weight:600;border-top:1px solid var(--border);margin-top:6px;padding-top:6px;">
+      <span>合计</span><span style="color:${tt.total >= 0 ? 'var(--green)' : 'var(--red)'}">${tt.total >= 0 ? '+' : ''}${tt.total}</span>
+    </div>
+    <button class="popup-close" onclick="closePopup()">关闭</button>
+  `;
+  showPopup(popupHtml);
+}
+
+// ===== 工作时间银行事件处理 =====
+function onWorkPunctualChange() {
+  const d = getDayData(currentDate);
+  d.workLeaveOnTime = $('workLeaveOnTime').checked;
+  saveStore();
+  renderWorkBankStatsOnly();
+  renderWorkTimeInputs();
+  renderWorkTenacity();
+}
+
+function onWorkFocusCheckChange() {
+  const d = getDayData(currentDate);
+  d.workFocusChecked = $('workFocusChecked').checked;
+  saveStore();
+  renderWorkTimeInputs();
+  renderWorkTenacity();
+}
+
+function onWeekendQualityChange(q) {
+  const d = getDayData(currentDate);
+  d.weekendQuality = (d.weekendQuality === q) ? '' : q;
+  saveStore();
+  renderWorkBankStatsOnly();
+  renderWorkTimeInputs();
+  renderWorkTenacity();
+}
+
+function onWorkOvertimeChange() {
+  const d = getDayData(currentDate);
+  d.workOvertime = $('workOvertime').value;
+  saveStore();
+  renderWorkBankStatsOnly();
+}
+
+function onWorkBusinessTripChange() {
+  const d = getDayData(currentDate);
+  d.workBusinessTrip = $('workBusinessTrip').checked;
+  saveStore();
+  renderWorkBankStatsOnly();
+  renderWorkTimeInputs();
+  renderWorkTenacity();
+}
+
+function onWorkVoucherChange() {
+  const d = getDayData(currentDate);
+  d.workVoucher = $('workVoucher').checked;
+  saveStore();
+  renderWorkTenacity();
+}
+
+function toggleOvertimeRules() {
+  workOvertimeRulesOpen = !workOvertimeRulesOpen;
+  const el = $('overtimeRules');
+  if (el) el.classList.toggle('show', workOvertimeRulesOpen);
+}
+
+// ===== 韧性积分渲染 =====
+function renderTenacity() {
+  const d = getDayData(currentDate);
+  const tt = calcTenacityToday(currentDate);
+  const todayDow = getDayOfWeek(parseDate(currentDate));
+
+  // 先存储今日韧性积分，再计算总数（确保 calcTotalTenacity 读到最新值）
+  d._tenacityToday = tt.total;
+  const totalTen = calcTotalTenacity();
+
+  // 计算连续周期天数（每满3天清零，当前周期内显示 1/2/3）
+  const durDays = getStreakCycleCount(currentDate, (d) => Number(d.sleepDuration) >= 450);
+  const prepDays = getStreakCycleCount(currentDate, isPrepareSleepOnTime);
+  const fallDays = getStreakCycleCount(currentDate, (d) => {
+    if (!d.sleepFallAsleepTime) return false;
+    const [h, m] = d.sleepFallAsleepTime.split(':').map(Number);
+    const totalMin = h * 60 + m;
+    return totalMin >= 20 * 60 && totalMin <= 23 * 60 + 59;
+  });
+
+  // 准备睡觉连击的文案随规则变更日切换（查看日决定显示哪条规则）
+  const prepLabel = (currentDate >= PREP_RULE_CHANGE_DATE)
+    ? '连续3天准备睡觉时间≤22:30（+2）'
+    : '连续3天准备睡觉时间≤23:00（+1）';
+
+  let html = `
+    <div class="tenacity-header">
+      <div class="t-stat">
+        <div class="t-label">睡眠银行韧性积分</div>
+        <div class="t-value">${totalTen}</div>
+      </div>
+      <div class="t-stat clickable" onclick="showTenacityBreakdown()" style="cursor:pointer;">
+        <div class="t-label">${currentDate === todayStr() ? '今日获得' : '该日获得'}韧性积分</div>
+        <div class="t-value">${tt.total >= 0 ? '+' : ''}${tt.total}</div>
+      </div>
+      <div class="t-stat">
+        <div class="t-label">是否使用韧性积分</div>
+        <div class="t-value">
+          <input type="checkbox" id="voucherExchanged" onchange="onVoucherChange()" ${d.voucherExchanged ? 'checked' : ''} style="accent-color:var(--accent);">
+        </div>
+      </div>
+      <div class="t-stat">
+        <div class="t-label">贷款利息</div>
+        <div class="t-value" style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+          <label style="font-size:0.66rem;font-weight:400;color:var(--text-dim);display:flex;align-items:center;gap:3px;cursor:pointer;">
+            <input type="checkbox" id="loanActive" onchange="onLoanActiveChange()" ${d.loanActive ? 'checked' : ''} style="accent-color:var(--accent);width:14px;height:14px;">贷款中
+          </label>
+          <input type="number" id="loanInterest" min="0" step="1" value="${(d.loanInterest === '' || d.loanInterest == null) ? '' : d.loanInterest}" onchange="onLoanInterestChange(this.value)" placeholder="利息" style="width:100%;box-sizing:border-box;font-size:0.72rem;font-weight:400;padding:2px 4px;border:1px solid var(--border);border-radius:4px;background:var(--bg-input);color:var(--text);text-align:center;outline:none;">
+        </div>
+      </div>
+    </div>`;
+
+  // 抵押券：勾了就扣本日 -10；时光穿越是否取消它由你手动回到那天改勾选框
+  if (d.voucherExchanged) {
+    html += `<div style="font-size:0.72rem;color:var(--orange);margin:4px 0 8px;padding-left:4px;">${voucherDeductionNote(currentDate)}</div>`;
+  }
+
+  // 贷款利息提示
+  if (d.loanActive) {
+    const li = Number(d.loanInterest) || 0;
+    html += `<div style="font-size:0.72rem;color:${li > 0 ? 'var(--red)' : 'var(--text-muted)'};margin:4px 0 8px;padding-left:4px;">贷款中：当日扣除贷款利息 ${li > 0 ? '-' + li : '0'} 韧性积分</div>`;
+  }
+
+  // 检查是否因昨日为不眠者暂停
+  const paused = isPrevDayInsomniac(currentDate);
+  const pauseNote = paused ? '<span style="font-size:0.7rem;color:var(--orange);margin-left:6px;">因昨日为不眠者暂停一天</span>' : '';
+
+  html += `
+    <div class="tenacity-checks">
+      <div class="tenacity-check-row">
+        <span class="streak-badge ${durDays >= 3 ? 'streak-done' : ''}">${durDays}</span>
+        <span>连续3天睡眠时长≥7.5h（+1）</span>
+        ${paused ? pauseNote : ''}
+      </div>
+      <div class="tenacity-check-row">
+        <span class="streak-badge ${prepDays >= 3 ? 'streak-done' : ''}">${prepDays}</span>
+        <span>${prepLabel}</span>
+        ${paused ? pauseNote : ''}
+      </div>
+      <div class="tenacity-check-row">
+        <span class="streak-badge ${fallDays >= 3 ? 'streak-done' : ''}">${fallDays}</span>
+        <span>连续3天入睡时间≤00:00（+3）</span>
+        ${paused ? pauseNote : ''}
+      </div>
+    </div>
+
+    ${renderTimeTravelHtml()}
+  `;
+
+  // 周结算（仅周日）
+  if (todayDow === 0) {
+    const weekly = calcWeeklyTenacity(currentDate);
+    const monday = parseDate(getMonday(parseDate(currentDate)));
+    const weekEnd = new Date(monday);
+    weekEnd.setDate(weekEnd.getDate() + 6);
+
+    html += `<div class="weekly-section">
+      <div class="ws-title">📅 周结算 (${fmtDate(monday)} ~ ${fmtDate(weekEnd)})</div>
+      <div class="tenacity-check-row">
+        <span class="check-icon">${weekly.w1 ? '✅' : '⬜'}</span>
+        <span>周平均睡眠时长比上周多 ≥ 10min → +3 韧性积分</span>
+      </div>
+      <div class="tenacity-check-row">
+        <span class="check-icon">${weekly.w2 ? '✅' : '⬜'}</span>
+        <span>周平均入睡时间比上周早 ≥ 30min → +3 韧性积分</span>
+      </div>
+      <table class="weekly-table">
+        <thead><tr><th></th><th colspan="2">上周</th><th colspan="2">本周</th></tr>
+        <tr><th>日期</th><th>入睡时间</th><th>睡眠时长</th><th>入睡时间</th><th>睡眠时长</th></tr></thead>
+        <tbody>`;
+
+    // 单元格渲染：用抵押券抵扣的那天显示“-”，不计入周统计
+    const wcell = (x, isDur) => {
+      if (x.voucher) return '-';
+      if (isDur) return x.duration ? Math.floor(x.duration/60)+'h'+x.duration%60+'min' : '—';
+      return x.fallAsleep || '—';
+    };
+
+    for (let i = 0; i < 7; i++) {
+      const lw = weekly.lastWeek[i];
+      const tw = weekly.thisWeek[i];
+      html += `<tr>
+        <td>${lw.label}</td>
+        <td>${wcell(lw, false)}</td>
+        <td>${wcell(lw, true)}</td>
+        <td>${wcell(tw, false)}</td>
+        <td>${wcell(tw, true)}</td>
+      </tr>`;
+    }
+
+    html += `<tr style="font-weight:600;border-top:1px solid var(--border);">
+        <td>平均</td>
+        <td>${weekly.lastHasData ? formatTimeMin(weekly.lastAvgSleep) : '—'}</td>
+        <td>${weekly.lastAvgDur ? Math.floor(weekly.lastAvgDur/60)+'h'+Math.round(weekly.lastAvgDur%60)+'min' : '—'}</td>
+        <td>${weekly.thisHasData ? formatTimeMin(weekly.thisAvgSleep) : '—'}</td>
+        <td>${weekly.thisAvgDur ? Math.floor(weekly.thisAvgDur/60)+'h'+Math.round(weekly.thisAvgDur%60)+'min' : '—'}</td>
+      </tr>`;
+
+    html += `</tbody></table></div>`;
+    // 周结算加分已纳入 calcTenacityToday，无需额外累加
+  }
+
+  $('tenacitySection').innerHTML = html;
+  saveStore();
+}
+
+function onVoucherChange() {
+  const d = getDayData(currentDate);
+  d.voucherExchanged = $('voucherExchanged').checked;
+  saveStore();
+  renderSleepBankStatsOnly();
+  renderTenacity();
+}
+
+// 贷款利息：是否贷款中
+function onLoanActiveChange() {
+  const d = getDayData(currentDate);
+  d.loanActive = $('loanActive').checked;
+  saveStore();
+  renderTenacity();
+}
+
+// 贷款利息：手动填写当日应扣的利息（韧性积分）
+function onLoanInterestChange(val) {
+  const d = getDayData(currentDate);
+  d.loanInterest = (val === '' || val == null) ? '' : Number(val);
+  saveStore();
+  renderTenacity();
+}
+
+function formatTimeMin(totalMin) {
+  const sign = totalMin < 0 ? '-' : '';
+  const abs = Math.abs(totalMin);
+  const h = Math.floor(abs / 60);
+  const m = Math.round(abs % 60);
+  return `${sign}${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+}
+
+function showTenacityBreakdown() {
+  const d = getDayData(currentDate);
+  const tt = calcTenacityToday(currentDate);
+  const title = currentDate === todayStr() ? '今日韧性积分分项' : '该日韧性积分分项';
+  const prepRowLabel = (currentDate >= PREP_RULE_CHANGE_DATE)
+    ? '连续3天准备睡觉≤22:30' : '连续3天准备睡觉≤23:00';
+  let popupHtml = `
+    <h3>${title}</h3>
+    <div class="popup-row"><span>连续3天睡眠≥7.5h</span><span>${tt.t1 ? '+1' : '0'}</span></div>
+    <div class="popup-row"><span>${prepRowLabel}</span><span>${tt.t2 ? '+' + tt.t2 : '0'}</span></div>
+    <div class="popup-row"><span>连续3天入睡时间≤00:00</span><span>${tt.t3 ? '+3' : '0'}</span></div>`;
+  if (tt.voucher) {
+    popupHtml += `<div class="popup-row"><span>使用抵押券</span><span style="color:var(--red)">${tt.voucher}</span></div>`;
+  }
+  if (tt.loan) {
+    popupHtml += `<div class="popup-row"><span>贷款利息</span><span style="color:var(--red)">${tt.loan}</span></div>`;
+  }
+  if (tt.butterfly) {
+    popupHtml += `<div class="popup-row"><span>蝴蝶效应</span><span style="color:var(--red)">${tt.butterfly}</span></div>`;
+  }
+  popupHtml += `
+    <div class="popup-row" style="font-weight:600;border-top:1px solid var(--border);margin-top:6px;padding-top:6px;">
+      <span>合计</span><span style="color:${tt.total >= 0 ? 'var(--green)' : 'var(--red)'}">${tt.total >= 0 ? '+' : ''}${tt.total}</span>
+    </div>
+    <button class="popup-close" onclick="closePopup()">关闭</button>
+  `;
+  showPopup(popupHtml);
+}
+
+// ===== 技能说明弹窗 =====
+function showSkillInfo(name) {
+  const infos = {
+    '欺瞒': '仅适用于守夜人。若成功，获得1d6×5min的欺瞒时间，在此时间内完成则也可算执行成功。大成功满数值，大失败则需提前1d6×5min执行。',
+    '延时响应': '适用于除守夜人和不眠者以外的身份。若成功，则可将身份生效时间延后2d6×1（普通成功）/2（困难成功）/3（极难成功）min，亦算执行成功，但截止时间不变。大成功满数值，大失败则需提前2d6min开始。',
+    '句号': '适用于前一天身份为炼金术士、观众、阅读者、记录官、作家。若成功，则当日可继续该身份。不能在自选身份的第二日使用，每两天最多使用一次。大成功最多可连续三天，也可主动放弃第三天；大失败则当日和下一日均不能执行该身份。',
+    '芭丝特的祝福': '适用于驯兽师。若成功，小猫咪不介意你占用身份时间给她梳毛刷牙，也不介意你看视频，并额外送你0.1×1d3×1（普通成功）/2（困难成功）/3（极难成功）个金币。若失败则介意。大失败-0.5分。大成功则额外+1分且小猫咪不介意你边陪玩边做任何事情。有芭丝特的祝福时，如果执行期间小猫咪自己躲起来睡觉了，那就可以做其他事情了。',
+    '时-光-倒-流': '若成功，则可重新投一次身份。如果是困难或极难成功，还可以从两个世界线中选择一条。每两天最多使用一次。大成功可重骰三次并在其中选择一条，大失败则封印一周技能。',
+    '时-光-倒-流v2': '若成功，则可重新投一次身份。如果是困难或极难成功，还可以从两个世界线中选择一条。每两天最多使用一次。大成功可重骰三次并在其中选择一条，大失败则封印一周技能。（与沉眠符咒版规则相同，输入输出互不影响）',
+    '握烬成光': '已经确定身份执行失败后可发动此技能。若成功，则如能在01:00前闭眼，则不仅可以不扣分，还能追溯0.2分。无视大成功大失败。',
+    '浑水摸鱼': '若成功，则可将洗碗时间算在一小时内，若大成功则可当个混子直接获得金币，若大失败则前置身份扮演时间延长至一个半小时（身份5时若提前结束则重骰一次身份）。',
+    '时光穿越': '若成功：由你自行回到上一次使用抵押券的那天，手动取消当天「是否兑换抵押券」的勾选（该日 -10 即被撤销，页面不会自动改动任何积分），同时本日会引发蝴蝶效应，多扣除1d3的韧性积分。若为大成功，则不引发蝴蝶效应；若为大失败，则技能封印一个月。本框只记录投掷值、判定结果与蝴蝶效应。时光穿越不能连续使用形成嵌套，且成功后冷却时间为两周。',
+  };
+  showPopup(`
+    <h3>${name} - 技能说明</h3>
+    <p style="font-size:0.85rem;color:var(--text-dim);line-height:1.7;">${infos[name] || '暂无说明'}</p>
+    <button class="popup-close" onclick="closePopup()">关闭</button>
+  `);
+}
+
+// ===== 弹窗系统 =====
+function showPopup(html) {
+  $('popupContent').innerHTML = html;
+  $('popupOverlay').classList.add('show');
+}
+
+function closePopup(event) {
+  if (event && event.target !== $('popupOverlay') && event.target !== event.currentTarget) return;
+  $('popupOverlay').classList.remove('show');
+}
+
+// ===== 数据导出（用于把浏览器里的真实存储发给助手核对）=====
+function exportStoreData() {
+  const raw = localStorage.getItem(STORAGE_KEY) || '{}';
+  showPopup(`
+    <h3>导出当前数据</h3>
+    <p style="font-size:0.8rem;color:var(--text-dim);">请把下面文本框里的内容全部复制，发给助手核对（含你的初始积分与每日记录）。</p>
+    <textarea id="exportArea" readonly style="width:100%;height:320px;font-size:11px;font-family:monospace;box-sizing:border-box;white-space:pre;">${raw}</textarea>
+    <div style="margin-top:10px;display:flex;gap:8px;">
+      <button class="popup-close" style="position:static;" onclick="(function(){var t=document.getElementById('exportArea');t.select();try{document.execCommand('copy');}catch(e){} })()">复制</button>
+      <button class="popup-close" onclick="closePopup()">关闭</button>
+    </div>
+  `);
+}
+
+// ===== 数据导入（粘贴「导出全部数据」的 JSON 恢复账本）=====
+function showImportDialog() {
+  showPopup(`
+    <h3>导入数据（覆盖恢复）</h3>
+    <p style="font-size:0.8rem;color:var(--text-dim);">把之前在旧网址「导出全部数据」复制的整段 JSON 粘贴到下面。导入后<strong style="color:var(--red);">当前网址的账本会被整体覆盖</strong>，请确认当前网址没有需要保留的数据。</p>
+    <textarea id="importArea" placeholder='粘贴形如 {"_tenacityBase":4,"2026-07-28":{...}} 的导出内容' style="width:100%;height:280px;font-size:11px;font-family:monospace;box-sizing:border-box;white-space:pre;"></textarea>
+    <div style="margin-top:10px;display:flex;gap:8px;">
+      <button class="popup-close" style="position:static;" onclick="doImportStoreData()">导入并覆盖</button>
+      <button class="popup-close" onclick="closePopup()">取消</button>
+    </div>
+  `);
+}
+
+function doImportStoreData() {
+  const ta = document.getElementById('importArea');
+  const text = ((ta && ta.value) || '').trim();
+  if (!text) { showToast('请先粘贴导出的数据'); return; }
+  let data;
+  try { data = JSON.parse(text); } catch (e) { showToast('解析失败：不是有效的 JSON'); return; }
+  // 兼容包装格式 {sleepRuneData_v3:{...}} / {data:{...}} / {store:{...}}
+  if (data && typeof data === 'object' && data._tenacityBase === undefined && data._workTenacityBase === undefined) {
+    const inner = data[STORAGE_KEY] || data.data || data.store;
+    if (inner && typeof inner === 'object') data = inner;
+  }
+  const dayKeys = data && typeof data === 'object'
+    ? Object.keys(data).filter(k => /^\d{4}-\d{2}-\d{2}$/.test(k)) : [];
+  const hasMeta = data && typeof data === 'object'
+    && (data._tenacityBase !== undefined || data._workTenacityBase !== undefined || data._timeTravel !== undefined);
+  if (!hasMeta && !dayKeys.length) {
+    showToast('格式不对：请粘贴「导出全部数据」弹窗里的完整内容');
+    return;
+  }
+  if (!window.confirm('确定导入吗？\n\n当前网址的账本将被整体覆盖（含 ' + dayKeys.length + ' 天记录）。')) return;
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  } catch (e) { showToast('写入失败：' + e.message); return; }
+  loadStore();   // 全套自愈：结构修复、抵押券/冷却误触清理、派生韧性与年结算重算
+  saveStore();
+  initDayData(currentDate);
+  renderAll();
+  closePopup();
+  showToast('导入成功：' + dayKeys.length + ' 天记录');
+}
+
+// 点击遮罩关闭
+$('popupOverlay').addEventListener('click', function(e) {
+  if (e.target === this) closePopup();
+});
+
+// ===== Toast =====
+let toastTimer;
+function showToast(msg) {
+  const toast = $('toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove('show'), 2000);
+}
+
+// ===== 日期导航 =====
+function shiftDate(days) {
+  const d = parseDate(currentDate);
+  d.setDate(d.getDate() + days);
+  currentDate = fmtDate(d);
+  initDayData(currentDate);
+  renderAll();
+}
+
+function goToday() {
+  currentDate = todayStr();
+  initDayData(currentDate);
+  renderAll();
+}
+
+$('datePicker').addEventListener('change', function() {
+  currentDate = this.value;
+  initDayData(currentDate);
+  renderAll();
+});
+
+// ===== 模块折叠 =====
+function toggleModule(bodyId) {
+  const body = $(bodyId);
+  const isOpen = body.classList.contains('open');
+  body.classList.toggle('open');
+  // 更新toggle图标
+  const toggleEl = bodyId === 'coinBody' ? $('coinToggle') : $('bankToggle');
+  if (body.classList.contains('open')) {
+    toggleEl.classList.add('open');
+  } else {
+    toggleEl.classList.remove('open');
+  }
+}
+
+function toggleSub(bodyId) {
+  const body = $(bodyId);
+  body.classList.toggle('open');
+  // 更新toggle图标
+  let toggleEl;
+  if (bodyId === 'sleepRuneBody') toggleEl = $('sleepRuneToggle');
+  else if (bodyId === 'choresBody') toggleEl = $('choresToggle');
+  else if (bodyId === 'preIdBody') toggleEl = $('preIdToggle');
+  else if (bodyId === 'exchangeTreeBody') toggleEl = $('exchangeTreeToggle');
+  else if (bodyId === 'sleepBankBody') toggleEl = $('sleepBankToggle');
+  else if (bodyId === 'workTimeBody') toggleEl = $('workTimeToggle');
+  else if (bodyId === 'sleepReviewBody') toggleEl = $('sleepReviewToggle');
+  else if (bodyId === 'preIdReviewBody') toggleEl = $('preIdReviewToggle');
+
+  if (body.classList.contains('open')) {
+    toggleEl.classList.add('open');
+  } else {
+    toggleEl.classList.remove('open');
+  }
+}
+
+// ===== 初始化 =====
+function init() {
+  loadStore();
+  // 初始化当前日期
+  const today = todayStr();
+  if (!currentDate || currentDate === '') currentDate = today;
+  initDayData(currentDate);
+
+  // 默认展开两大系统（子模块默认收起，点击才展开）
+  $('coinBody').classList.add('open');
+  $('coinToggle').classList.add('open');
+  $('bankBody').classList.add('open');
+  $('bankToggle').classList.add('open');
+
+  renderAll();
+
+  // 加载即自检：发现不变量被破坏立刻弹横幅报警，而不是默默显示错数
+  const problems = selfTest();
+  if (problems.length) {
+    console.error('[数据自检] 发现问题:', problems);
+    showSelfTestBanner(problems);
+  }
+}
+
+// ===== Twemoji 兜底 =====
+if (window.twemoji) {
+  // 只给特定的 emoji 容器替换成图片，避免模块标题出现巨大 SVG
+  twemoji.parse(document.body, {
+    folder: 'svg',
+    ext: '.svg',
+    callback: function(icon, options, variant) {
+      // 跳过模块标题/子模块标题中的 emoji
+      var node = options && options.node ? options.node : null;
+      if (node) {
+        var parent = node.parentElement;
+        while (parent) {
+          if (parent.classList && (parent.classList.contains('module-header') || parent.classList.contains('sub-header') || parent.classList.contains('header'))) {
+            return false;
+          }
+          parent = parent.parentElement;
+        }
+      }
+      return ''.concat(options.base, options.size, '/', icon, options.ext);
+    }
+  });
+}
+
+// 启动
+document.addEventListener('DOMContentLoaded', init);
+
+// 监听存储变化（多标签页同步）
+window.addEventListener('storage', function(e) {
+  if (e.key === STORAGE_KEY) {
+    loadStore();
+    renderAll();
+  }
+});
+</script>
+<!-- PWA: 注册 Service Worker（缓存破坏参数随版本更新） -->
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('sw.js?v=20260930b').catch(function (e) {
+      console.warn('Service Worker 注册失败:', e);
+    });
+  });
+}
+</script>
+</body>
+</html>
