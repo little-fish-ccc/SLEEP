@@ -2197,7 +2197,18 @@ function calcWeeklyTenacity(dateStr) {
   const lastAvgDur = lastWeekDurations.length ? lastWeekDurations.reduce((a,b)=>a+b,0) / lastWeekDurations.length : 0;
 
   let w1 = 0, w2 = 0;
-  if (thisAvgDur > 0 && lastAvgDur > 0 && thisAvgDur - lastAvgDur >= 10) w1 = 3;
+  let w1Reason = '', w2Reason = '';
+
+  // w1：睡眠时长积分
+  // 规则A：本周比上周多 ≥ 10min → +3
+  // 隐藏规则B：即使没多10min，但两周平均都 > 8h(480min) → 也 +3
+  if (thisAvgDur > 0 && lastAvgDur > 0) {
+    if (thisAvgDur - lastAvgDur >= 10) {
+      w1 = 3; w1Reason = '比上周多≥10min';
+    } else if (thisAvgDur > 480 && lastAvgDur > 480) {
+      w1 = 3; w1Reason = '两周均>8h';
+    }
+  }
 
   // 平均入睡时间（带符号：18:00-23:59 → 距0点负分钟；00:00=0；0点之后 → 正分钟）
   const toSignedSleepMin = (t) => {
@@ -2214,10 +2225,19 @@ function calcWeeklyTenacity(dateStr) {
   const thisAvgSleep = thisHasData ? thisSleepTimes.reduce((a,b)=>a+b,0) / thisSleepTimes.length : 0;
   const lastAvgSleep = lastHasData ? lastSleepTimes.reduce((a,b)=>a+b,0) / lastSleepTimes.length : 0;
 
-  if (thisHasData && lastHasData && lastAvgSleep - thisAvgSleep >= 30) w2 = 3;
+  // w2：入睡时间韧性积分
+  // 规则A：本周比上周早 ≥ 30min → +3
+  // 隐藏规则B：即使没早30min，但两周平均都 ≤ 23:30(signed ≤ -30) → 也 +3
+  if (thisHasData && lastHasData) {
+    if (lastAvgSleep - thisAvgSleep >= 30) {
+      w2 = 3; w2Reason = '比上周早≥30min';
+    } else if (thisAvgSleep <= -30 && lastAvgSleep <= -30) {
+      w2 = 3; w2Reason = '两周均≤23:30';
+    }
+  }
 
   return {
-    w1, w2,
+    w1, w2, w1Reason, w2Reason,
     thisWeek: thisWeekData,
     lastWeek: lastWeekData,
     thisAvgDur, lastAvgDur,
@@ -3605,11 +3625,11 @@ function renderTenacity() {
       <div class="ws-title">📅 周结算 (${fmtDate(monday)} ~ ${fmtDate(weekEnd)})</div>
       <div class="tenacity-check-row">
         <span class="check-icon">${weekly.w1 ? '✅' : '⬜'}</span>
-        <span>周平均睡眠时长比上周多 ≥ 10min → +3 韧性积分</span>
+        <span>周平均睡眠时长比上周多 ≥ 10min，或两周均 > 8h → +3 韧性积分${weekly.w1Reason ? ` <span style="color:var(--green);font-size:0.72rem;">（${weekly.w1Reason}）</span>` : ''}</span>
       </div>
       <div class="tenacity-check-row">
         <span class="check-icon">${weekly.w2 ? '✅' : '⬜'}</span>
-        <span>周平均入睡时间比上周早 ≥ 30min → +3 韧性积分</span>
+        <span>周平均入睡时间比上周早 ≥ 30min，或两周均 ≤ 23:30 → +3 韧性积分${weekly.w2Reason ? ` <span style="color:var(--green);font-size:0.72rem;">（${weekly.w2Reason}）</span>` : ''}</span>
       </div>
       <table class="weekly-table">
         <thead><tr><th></th><th colspan="2">上周</th><th colspan="2">本周</th></tr>
