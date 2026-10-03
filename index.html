@@ -2205,8 +2205,8 @@ function calcWeeklyTenacity(dateStr) {
   if (thisAvgDur > 0 && lastAvgDur > 0) {
     if (thisAvgDur - lastAvgDur >= 10) {
       w1 = 3; w1Reason = '比上周多≥10min';
-    } else if (thisAvgDur > 480 && lastAvgDur > 480) {
-      w1 = 3; w1Reason = '两周均>8h';
+    } else if (thisAvgDur >= 480 && lastAvgDur >= 480) {
+      w1 = 3; w1Reason = '两周均≥8h';
     }
   }
 
@@ -3625,7 +3625,7 @@ function renderTenacity() {
       <div class="ws-title">📅 周结算 (${fmtDate(monday)} ~ ${fmtDate(weekEnd)})</div>
       <div class="tenacity-check-row">
         <span class="check-icon">${weekly.w1 ? '✅' : '⬜'}</span>
-        <span>周平均睡眠时长比上周多 ≥ 10min，或两周均 > 8h → +3 韧性积分${weekly.w1Reason ? ` <span style="color:var(--green);font-size:0.72rem;">（${weekly.w1Reason}）</span>` : ''}</span>
+        <span>周平均睡眠时长比上周多 ≥ 10min，或两周均 ≥ 8h → +3 韧性积分${weekly.w1Reason ? ` <span style="color:var(--green);font-size:0.72rem;">（${weekly.w1Reason}）</span>` : ''}</span>
       </div>
       <div class="tenacity-check-row">
         <span class="check-icon">${weekly.w2 ? '✅' : '⬜'}</span>
