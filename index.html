@@ -2147,6 +2147,21 @@ function isVoucherOffset(dateStr) {
   return !!d.voucherExchanged;
 }
 
+// 睡眠时长（分钟）→ "XhYmin"
+// 关键：必须先对总分钟数取整再分解。
+// 若写成 floor(m/60)+'h'+round(m%60)+'min'，当余数接近 60（如 419.6min）
+// 会被 round 成 60，显示出 “6h60min” 这种不存在的写法。
+function fmtDurMin(minutes) {
+  const m = Number(minutes) || 0;
+  if (!m || m <= 0) return '—';
+  const total = Math.round(m);
+  const h = Math.floor(total / 60);
+  const r = total % 60;
+  if (h === 0) return `${r}min`;          // 不足1小时：只显示分钟，避免 "0h59min"
+  if (r === 0) return `${h}h`;            // 整小时：省略 min
+  return `${h}h${r}min`;
+}
+
 // 周结算检查
 function calcWeeklyTenacity(dateStr) {
   const d = parseDate(dateStr);
@@ -3637,9 +3652,11 @@ function renderTenacity() {
         <tbody>`;
 
     // 单元格渲染：用抵押券抵扣的那天显示“-”，不计入周统计
+    // 时长统一用 fmtDurMin：必须先对总分钟取整再分解，
+    // 否则会出现“6h60min”这种余数被四舍五入到 60 的错误写法。
     const wcell = (x, isDur) => {
       if (x.voucher) return '-';
-      if (isDur) return x.duration ? Math.floor(x.duration/60)+'h'+x.duration%60+'min' : '—';
+      if (isDur) return fmtDurMin(x.duration);
       return x.fallAsleep || '—';
     };
 
@@ -3658,9 +3675,9 @@ function renderTenacity() {
     html += `<tr style="font-weight:600;border-top:1px solid var(--border);">
         <td>平均</td>
         <td>${weekly.lastHasData ? formatTimeMin(weekly.lastAvgSleep) : '—'}</td>
-        <td>${weekly.lastAvgDur ? Math.floor(weekly.lastAvgDur/60)+'h'+Math.round(weekly.lastAvgDur%60)+'min' : '—'}</td>
+        <td>${fmtDurMin(weekly.lastAvgDur)}</td>
         <td>${weekly.thisHasData ? formatTimeMin(weekly.thisAvgSleep) : '—'}</td>
-        <td>${weekly.thisAvgDur ? Math.floor(weekly.thisAvgDur/60)+'h'+Math.round(weekly.thisAvgDur%60)+'min' : '—'}</td>
+        <td>${fmtDurMin(weekly.thisAvgDur)}</td>
       </tr>`;
 
     html += `</tbody></table></div>`;
