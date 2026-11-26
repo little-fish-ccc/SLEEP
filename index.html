@@ -11,10 +11,10 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="沉眠符咒">
-<link rel="manifest" href="manifest.json?v=20260930b">
-<link rel="apple-touch-icon" href="icon-192.png?v=20260930b">
+<link rel="manifest" href="manifest.json?v=20261126a">
+<link rel="apple-touch-icon" href="icon-192.png?v=20261126a">
 <title>💤 沉眠符咒 - 金币系统+银行系统</title>
-<script src="https://cdn.jsdelivr.net/npm/@twemoji/api@latest/dist/twemoji.min.js?v=20260930b" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@twemoji/api@latest/dist/twemoji.min.js?v=20261126a" crossorigin="anonymous"></script>
 <style>
 /* ===== CSS 变量 ===== */
 :root {
@@ -493,6 +493,13 @@ select { min-width: 80px; }
             <label>身份 (1-10):</label>
             <input type="number" id="sleepIdentity" min="1" max="10" placeholder="1-10" onchange="onSleepIdentityChange()">
             <span id="sleepIdentityName" style="color:var(--accent-2);font-size:0.85rem;"></span>
+          </div>
+          <div class="form-row" id="sleepSelfPickRow">
+            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+              <input type="checkbox" id="sleepSelfPick" onchange="onSleepSelfPickChange()">
+              <span>自选身份</span>
+            </label>
+            <span id="sleepSelfPickHint" style="font-size:0.72rem;color:var(--text-muted);"></span>
           </div>
           <table class="skill-table">
             <thead><tr><th>技能名称</th><th>技能数值</th><th>投掷值</th><th>判定结果</th><th>说明</th></tr></thead>
@@ -1051,6 +1058,8 @@ function initDayData(dateStr) {
   if (d.sleepSkillCoin === undefined) d.sleepSkillCoin = 0;
   if (d.sleepSuccess === undefined) d.sleepSuccess = null;
   if (d.sleepCoin === undefined) d.sleepCoin = null;
+  // 自选身份标记（每周仅一次）
+  if (d.sleepIdentitySelfPick === undefined) d.sleepIdentitySelfPick = false;
   if (d.chores === undefined) d.chores = {};
   if (d.preIdSkills === undefined) d.preIdSkills = {};
   if (d.preIdSkillExtras === undefined) d.preIdSkillExtras = {};
@@ -2261,6 +2270,31 @@ function calcWeeklyTenacity(dateStr) {
   };
 }
 
+// ===== 自选身份（每周一次） =====
+// 取所在周的周一（与周结算口径一致）
+function getWeekMondayStr(dateStr) {
+  const d = parseDate(dateStr);
+  const day = d.getDay();
+  const diff = day === 0 ? -6 : 1 - day;
+  d.setDate(d.getDate() + diff);
+  return fmtDate(d);
+}
+
+// 本周是否已被占用自选身份；返回占用日期（排除 excludeDate），无则 null
+function getSelfPickUsedDate(dateStr, excludeDate) {
+  const monday = getWeekMondayStr(dateStr);
+  const m = parseDate(monday);
+  for (let i = 0; i < 7; i++) {
+    const td = new Date(m);
+    td.setDate(td.getDate() + i);
+    const tdStr = fmtDate(td);
+    if (tdStr === excludeDate) continue;
+    const dd = store[tdStr];
+    if (dd && dd.sleepIdentitySelfPick && Number(dd.sleepIdentity) >= 1) return tdStr;
+  }
+  return null;
+}
+
 // ===== 身份回顾 =====
 function getIdentityStats(system) {
   const stats = {};
@@ -2286,6 +2320,22 @@ function getIdentityStats(system) {
   return stats;
 }
 
+// 自选身份单独统计（仅沉眠符咒）
+function getSelfPickStats(system) {
+  let success = 0, fail = 0;
+  if (system !== 'sleep') return { success, fail };
+  for (const key in store) {
+    if (key.startsWith('_')) continue;
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(key)) continue;
+    const d = store[key];
+    if (!d.sleepIdentitySelfPick) continue;
+    if (!(Number(d.sleepIdentity) >= 1)) continue;
+    if (d.sleepSuccess === 'yes') success++;
+    else if (d.sleepSuccess === 'no') fail++;
+  }
+  return { success, fail };
+}
+
 function renderIdentityReview(system) {
   const bodyId = system === 'sleep' ? 'sleepReviewBody' : 'preIdReviewBody';
   const body = $(bodyId);
@@ -2301,10 +2351,25 @@ function renderIdentityReview(system) {
       <td style="text-align:center;color:var(--red);">${stats[i].fail}</td>
     </tr>`;
   }
+  let extra = '';
+  if (system === 'sleep') {
+    const sp = getSelfPickStats('sleep');
+    const usedDate = getSelfPickUsedDate(currentDate, null);
+    rows += `<tr style="border-top:2px solid var(--border-light);">
+      <td style="text-align:center;color:var(--accent);">★</td>
+      <td style="color:var(--accent);">自选身份（单独统计）</td>
+      <td style="text-align:center;color:var(--green);">${sp.success}</td>
+      <td style="text-align:center;color:var(--red);">${sp.fail}</td>
+    </tr>`;
+    extra = `<div style="font-size:0.72rem;color:var(--text-muted);margin-top:6px;line-height:1.6;">
+      ★ 自选身份与上方对应身份重复计入，此处仅作单独汇总<br>
+      本周自选身份：${usedDate ? `已使用（${usedDate.slice(5).replace('-', '月')}日）` : '未使用'}
+    </div>`;
+  }
   body.innerHTML = `<table class="review-table">
     <thead><tr><th>序号</th><th>名称</th><th>扮演成功次数</th><th>扮演失败次数</th></tr></thead>
     <tbody>${rows}</tbody>
-  </table>`;
+  </table>${extra}`;
 }
 
 // ===== UI 渲染 =====
@@ -2424,6 +2489,30 @@ function renderSleepRune() {
   // 身份
   $('sleepIdentity').value = d.sleepIdentity || '';
   $('sleepIdentityName').textContent = d.sleepIdentity ? (IDENTITY_NAMES[Number(d.sleepIdentity)] || '') : '';
+
+  // 自选身份（每周一次）
+  const selfPickEl = $('sleepSelfPick');
+  const selfPickHint = $('sleepSelfPickHint');
+  if (selfPickEl && selfPickHint) {
+    const idNum = Number(d.sleepIdentity) || 0;
+    const usedElsewhere = getSelfPickUsedDate(currentDate, currentDate);
+    const isSelf = !!d.sleepIdentitySelfPick;
+    selfPickEl.checked = isSelf;
+    selfPickEl.disabled = !idNum || (!!usedElsewhere && !isSelf);
+    if (!idNum) {
+      selfPickHint.textContent = '先填入身份';
+      selfPickHint.style.color = 'var(--text-muted)';
+    } else if (usedElsewhere) {
+      selfPickHint.innerHTML = `本周自选已在 <b style="color:var(--gold)">${usedElsewhere.slice(5).replace('-', '/')}</b> 用掉`;
+      selfPickHint.style.color = 'var(--red)';
+    } else if (isSelf) {
+      selfPickHint.textContent = '★ 本周自选机会已用掉（可取消）';
+      selfPickHint.style.color = 'var(--gold)';
+    } else {
+      selfPickHint.textContent = '本周可自选 1 次';
+      selfPickHint.style.color = 'var(--text-muted)';
+    }
+  }
 
   // 技能表
   let rows = '';
@@ -2598,10 +2687,40 @@ function renderSkillExtraRow(name, result, d, threshold) {
   return '';
 }
 
+function onSleepSelfPickChange() {
+  const el = $('sleepSelfPick');
+  const d = getDayData(currentDate);
+  if (el.checked) {
+    if (!(Number(d.sleepIdentity) >= 1)) {
+      el.checked = false;
+      showPopup(`<h3>无法标记自选身份</h3><div class="popup-row"><span>请先填入身份（1-10）</span></div><button class="popup-close" onclick="closePopup()">知道了</button>`);
+      return;
+    }
+    const usedElsewhere = getSelfPickUsedDate(currentDate, currentDate);
+    if (usedElsewhere) {
+      el.checked = false;
+      showPopup(`<h3>本周自选身份已用完</h3>
+        <div class="popup-row"><span>使用日期</span><span style="color:var(--gold)">${usedElsewhere}</span></div>
+        <div class="popup-row" style="color:var(--text-muted);font-size:0.78rem;">每周仅有一次自选身份机会</div>
+        <button class="popup-close" onclick="closePopup()">知道了</button>`);
+      renderSleepRune();
+      return;
+    }
+    d.sleepIdentitySelfPick = true;
+  } else {
+    d.sleepIdentitySelfPick = false;
+  }
+  saveStore();
+  renderSleepRune();
+  renderIdentityReview('sleep');
+}
+
 function onSleepIdentityChange() {
   const val = $('sleepIdentity').value;
   const d = getDayData(currentDate);
   d.sleepIdentity = val;
+  // 身份清空时，自选标记一并取消（自选必须依附于具体身份）
+  if (!(Number(val) >= 1)) d.sleepIdentitySelfPick = false;
   $('sleepIdentityName').textContent = val ? (IDENTITY_NAMES[Number(val)] || '') : '';
   recalcSleepCoin();
   saveStore();
@@ -3971,7 +4090,7 @@ window.addEventListener('storage', function(e) {
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () {
-    navigator.serviceWorker.register('sw.js?v=20260930b').catch(function (e) {
+    navigator.serviceWorker.register('sw.js?v=20261126a').catch(function (e) {
       console.warn('Service Worker 注册失败:', e);
     });
   });
