@@ -1,5 +1,5 @@
 // 沉眠符咒 Service Worker —— 应用壳缓存（离线可用）
-const VERSION = '20261126a';
+const VERSION = '20261126b';
 const CACHE = 'shenmian-shell-' + VERSION;
 const ASSETS = [
   './',
